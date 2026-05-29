@@ -8,60 +8,115 @@
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-DC244C.svg?logo=qdrant&logoColor=white)](https://qdrant.tech/)
-[![Playwright](https://img.shields.io/badge/Playwright-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 [![Celery](https://img.shields.io/badge/Celery-37814A.svg?logo=celery&logoColor=white)](https://docs.celeryq.dev/)
+[![Playwright](https://img.shields.io/badge/Playwright-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 
-**100% Free & Open-Source AI inference engine — runs fully local, no vendor lock-in.**
+**The MIT-licensed AI inference engine behind N Assistant — runs fully local, no vendor lock-in.**
 
-🇬🇧 [English](#-english) · 🇻🇳 [Tiếng Việt](#-tiếng-việt) · 🇩🇪 [Deutsch](#-deutsch) · 🇨🇳 [中文](#-中文)
+🌐 🇬🇧 **English** · 🇻🇳 [Tiếng Việt](./README.vi.md) · 🇩🇪 [Deutsch](./README.de.md) · 🇨🇳 [中文](./README.zh.md)
 
 </div>
 
 ---
 
-## 🇬🇧 English
+## 🎯 Project Vision
 
-### 🎯 Project Vision
+**N-Assistant Core** is a multi-agent AI inference engine engineered to run **100% locally**.
 
-**N-Assistant Core** is a multi-agent AI inference engine built to run **100% locally**.
-It fuses a **Retrieval-Augmented Generation (RAG)** brain with a **Playwright**-driven
-automation arm, so autonomous agents can research, create, review and **publish content
-across multiple channels** without any human in the loop — and without sending a single
-byte to a third-party cloud unless *you* choose to.
+It fuses a **multi-tenant, multilingual Retrieval-Augmented Generation (RAG)** brain with a **Playwright**-driven automation arm, so autonomous agents can **research → create → review → publish** content across TikTok, YouTube, Facebook & Instagram — without a human in the loop, and without sending a single byte to a third-party cloud unless *you* choose to.
 
-It is engineered for AI and DevOps engineers who want full control: swap the LLM, own the
-vector index, self-host the whole stack, and read every line of the code that runs it.
+It is built for AI and DevOps engineers who want full control: swap the LLM, own the vector index, self-host the entire stack, and read every line of code that runs it.
 
-### 🏗️ Core Architecture
+---
 
-| Pillar | What it does |
-|---|---|
-| **🔀 Dual-Engine LLM Router** | A single `LLMClientBase` interface routes inference to **offline** engines (Ollama / Apple MLX serving Llama-3.1 / Qwen2.5) or **online** APIs (OpenAI / Claude). Switching engines is a config flag — never a code change. |
-| **🧠 Multi-tenant & Multilingual RAG** | **Qdrant** vector store + **`BAAI/bge-m3`** embeddings give one shared cross-lingual space (VN/EN/DE/CN). Every `upsert`/`search` is isolated by a mandatory `tenant_id` payload filter. |
-| **🕹️ Supervisor–Worker Agentic Pattern** | A Planner decomposes intent into a task graph; specialized workers (Researcher → Creator → Critic → Publisher) each run with minimal context. The Critic verifies grounding before anything ships. |
-| **📡 Omnichannel Auto-Distribution** | **Redis + Celery** drain async jobs to **Playwright** headless browsers that publish to social platforms, mimicking human behavior to stay within platform limits. |
-| **🌾 Autonomous Harvester** | A scheduled (cron) **Playwright + Stealth** crawler that acquires **public** data, cleans it, and lands it into **Qdrant** tagged by `tenant_id` — fully decoupled from the agents (*Data Ingestion ≠ Inference*). Sources live in `scraper_config.yaml`, never hardcoded. |
+## 🔥 Core Capabilities
 
-### 📂 Directory Structure (Hexagonal Architecture)
+### 1. 🔀 Dual-Engine LLM Router (Local + Cloud)
+A single `LLMClientBase` (OpenAI-compatible) interface lets every agent run on either engine **without a code change**:
+- **Local / Dev tier:** Ollama or Apple MLX serving `Llama-3.1-8B-Instruct` / `Qwen2.5` → zero-cost R&D, fully offline.
+- **Production / Scale tier:** vLLM on rented GPU (RunPod, AWS) or a fallback to OpenAI / Claude for peak demand.
+
+Routing is a **runtime config decision**, never a rewrite. The same agent code runs in both tiers.
+
+### 2. 🧠 Multi-Tenant & Multilingual RAG
+- **Vector store:** [Qdrant](https://qdrant.tech/) with tenant-scoped collections.
+- **Embeddings:** `BAAI/bge-m3` (1024-dim, 100+ languages) → one shared cross-lingual index, **no per-language collection**.
+- **Isolation:** every `upsert` / `search` enforces a mandatory `tenant_id` payload filter. **Zero cross-tenant leakage** is an architectural guarantee, not a runtime check.
+- **Cross-language retrieval:** a Vietnamese tenant can query their German-language knowledge base in one space.
+
+### 3. 🕹️ Supervisor–Worker Agent Topology
+We do **not** stuff everything into one giant prompt. Each request is decomposed into specialized roles:
+
+| Role | Responsibility | Tools |
+|---|---|---|
+| **Supervisor (Planner)** | Decompose intent → ordered task graph; route to workers | Task router |
+| **Researcher** | Trend-mine + tenant-scoped RAG query | `search_vector_db(tenant_id, …)` |
+| **Creator** | Draft script / copy / storyboard | `generate_text`, `generate_image`, `generate_audio` |
+| **Critic** | Brand-voice review + claim-vs-context anti-hallucination | RAG verifier (≤ 3 retry loops) |
+| **Publisher** | Trigger Playwright auto-upload | `publish_to_platform(tenant_id, …)` |
+
+The Critic verifies grounding before anything ships.
+
+### 4. 📡 Omnichannel Auto-Distribution
+**Redis + Celery** drain async jobs to **Playwright** headless browsers that publish while mimicking human behavior to stay within platform limits:
+- TikTok / Douyin · YouTube Shorts · Facebook · Instagram Reels.
+- Session cookies stored **AES-256 encrypted** (never plain-text).
+- `playwright-stealth` to evade bot-detection.
+- Schedule by tenant timezone + peak-hour heuristic.
+
+### 5. 🌾 Autonomous Harvester
+A scheduled (cron) **Playwright + Stealth** crawler that acquires **public** data, cleans it, and lands it into Qdrant tagged by `tenant_id` — fully decoupled from the agents (*Data Ingestion ≠ Inference*). Sources are declared in [`scraper_config.yaml`](./scraper_config.yaml), **never hardcoded**.
+
+---
+
+## 🏗️ Hexagonal Architecture
+
+The domain core depends on nothing; the outside world plugs in through ports. You can replace Qdrant, the LLM engine, or the web framework without touching business logic.
 
 ```
 n-assistant-core/
 ├── app/
 │   ├── domain/          # Pure business entities & ports — zero framework deps
 │   ├── application/     # Use cases: Supervisor-Worker agent orchestration
-│   ├── infrastructure/  # Driven adapters: Qdrant, Redis/Celery, LLM clients, Playwright Harvester
+│   ├── infrastructure/  # Driven adapters: Qdrant · Redis/Celery · LLM clients · Playwright Harvester
 │   └── api/             # Driving adapter: FastAPI routers, schemas, DI wiring
 ├── scraper_config.yaml  # Harvester sources — zero-hardcode (Chặng 0)
+├── docker-compose.yml   # Local stack: redis + qdrant + core-api (+ harvester profile)
 ├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # local stack: redis + qdrant + core-api (+ harvester profile)
 ├── requirements.txt
 └── LICENSE              # MIT
 ```
 
-The domain core depends on nothing; the outside world plugs in through ports. You can
-replace Qdrant, the LLM engine, or the web framework without touching business logic.
+---
 
-### ⚡ Quick Start
+## ⚡ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| API | FastAPI (Python 3.11) · Pydantic v2 · SQLAlchemy 2.x |
+| Vector / RAG | **Qdrant** · `BAAI/bge-m3` embeddings (1024-dim, multilingual) |
+| Inference | `LLMClientBase` → Ollama / Apple MLX (dev) · vLLM / Cloud API (prod) |
+| Agent framework | LangGraph (Supervisor–Worker) |
+| Async jobs | Celery 5 + Redis 7 broker |
+| Automation | Playwright + `playwright-stealth` |
+| ML runtime | PyTorch (MPS on Mac, CUDA on Linux GPU) |
+| Containers | Docker Compose (profiles: default, harvester) |
+| License | MIT |
+
+---
+
+## 🗺️ Roadmap
+
+| Phase | Theme | Status |
+|---|---|---|
+| **0. Harvester** | Autonomous public-data acquisition (Playwright + Stealth, cron) → Qdrant, decoupled from inference | 🟡 New |
+| **2. Memory** | RAG on Qdrant + `bge-m3`, multilingual ingest pipeline, `tenant_id` enforcement | 🚧 In progress |
+| **3. Brain** | LLM router + LangGraph Supervisor–Worker, Ollama/vLLM dual-engine, tool registry | ⏳ Next |
+| **4. Distribution** | Playwright publisher, AES-256 session vault, peak-time scheduler | ⏳ Planned |
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/nnkienn/n-assistant-core.git
@@ -74,190 +129,37 @@ curl http://localhost:8000/health
 
 That's it — a full local AI engine on `http://localhost:8000`.
 
----
-
-<details>
-<summary><h2>🇻🇳 Tiếng Việt</h2></summary>
-
-### 🎯 Tầm nhìn dự án
-
-**N-Assistant Core** là một động cơ suy luận AI đa đại lý (multi-agent) được thiết kế để
-chạy **100% trên máy local**. Nó kết hợp bộ não **RAG (Retrieval-Augmented Generation)**
-với cánh tay tự động hóa điều khiển bằng **Playwright**, cho phép các agent tự hành nghiên
-cứu, sáng tạo, kiểm duyệt và **phân phối nội dung đa kênh** mà không cần con người can
-thiệp — và không gửi một byte dữ liệu nào lên cloud bên thứ ba trừ khi *bạn* muốn.
-
-Dự án dành cho các kỹ sư AI và DevOps muốn toàn quyền kiểm soát: thay LLM tùy ý, sở hữu
-chỉ mục vector, tự host toàn bộ hệ thống, và đọc được từng dòng code đang chạy.
-
-### 🏗️ Kiến trúc Công nghệ Lõi
-
-| Trụ cột | Vai trò |
+| Service | URL |
 |---|---|
-| **🔀 Bộ định tuyến LLM Song Động cơ** | Một giao diện `LLMClientBase` duy nhất định tuyến suy luận tới engine **offline** (Ollama / Apple MLX chạy Llama-3.1 / Qwen2.5) hoặc API **online** (OpenAI / Claude). Đổi engine chỉ là một flag cấu hình — không phải sửa code. |
-| **🧠 RAG Đa người dùng & Đa ngôn ngữ** | Vector store **Qdrant** + embedding **`BAAI/bge-m3`** tạo một không gian xuyên ngôn ngữ chung (VN/EN/DE/CN). Mọi `upsert`/`search` đều bị cô lập bằng bộ lọc payload `tenant_id` bắt buộc. |
-| **🕹️ Mô hình Agentic Supervisor–Worker** | Một Planner phân rã ý định thành đồ thị tác vụ; các worker chuyên biệt (Researcher → Creator → Critic → Publisher) chạy với ngữ cảnh tối thiểu. Critic kiểm chứng tính xác thực trước khi xuất bản. |
-| **📡 Tự động Phân phối Đa kênh** | **Redis + Celery** rút hàng đợi tác vụ bất đồng bộ tới trình duyệt headless **Playwright** để đăng lên các nền tảng mạng xã hội, mô phỏng hành vi người dùng để tránh giới hạn nền tảng. |
-| **🌾 Harvester Tự hành** | Trình thu thập **Playwright + Stealth** chạy định kỳ (cron) cào dữ liệu **công khai**, làm sạch và nạp vào **Qdrant** kèm `tenant_id` — tách biệt hoàn toàn khỏi agent (*Thu thập dữ liệu ≠ Suy luận*). Nguồn khai báo trong `scraper_config.yaml`, không hardcode. |
+| Core API (RAG / LLM) | http://localhost:8000 |
+| Qdrant (vector DB) | http://localhost:6333 |
+| Redis (broker) | localhost:6379 |
 
-### 📂 Cấu trúc thư mục (Kiến trúc Hexagonal)
-
-```
-n-assistant-core/
-├── app/
-│   ├── domain/          # Thực thể nghiệp vụ thuần & các port — không phụ thuộc framework
-│   ├── application/     # Use case: điều phối agent Supervisor-Worker
-│   ├── infrastructure/  # Adapter bị điều khiển: Qdrant, Redis/Celery, LLM client, Playwright Harvester
-│   └── api/             # Adapter điều khiển: router FastAPI, schema, nối DI
-├── scraper_config.yaml  # Nguồn cào của Harvester — zero-hardcode (Chặng 0)
-├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # stack local: redis + qdrant + core-api (+ profile harvester)
-├── requirements.txt
-└── LICENSE              # MIT
-```
-
-Lõi domain không phụ thuộc gì cả; thế giới bên ngoài cắm vào qua các port. Bạn có thể thay
-Qdrant, engine LLM hay web framework mà không cần động đến logic nghiệp vụ.
-
-### ⚡ Bắt đầu nhanh
+**Enable the Harvester** (separate process, cron-driven):
 
 ```bash
-git clone https://github.com/nnkienn/n-assistant-core.git
-cd n-assistant-core
-docker compose up -d          # khởi chạy redis + qdrant + core-api
-
-curl http://localhost:8000/health
-# {"status":"ok","service":"core-api-opensource"}
+docker compose --profile harvester up -d
 ```
-
-Vậy là xong — một động cơ AI local hoàn chỉnh tại `http://localhost:8000`.
-
-</details>
 
 ---
 
-<details>
-<summary><h2>🇩🇪 Deutsch</h2></summary>
+## 🔐 Non-Negotiable Engineering Rules
 
-### 🎯 Projektvision
+These are **constitutional**. PRs that violate them are auto-rejected.
 
-**N-Assistant Core** ist eine Multi-Agenten-KI-Inferenz-Engine, die **zu 100 % lokal**
-läuft. Sie verbindet ein **RAG-Gehirn (Retrieval-Augmented Generation)** mit einem von
-**Playwright** gesteuerten Automatisierungsarm, sodass autonome Agenten recherchieren,
-erstellen, prüfen und **Inhalte über mehrere Kanäle veröffentlichen** können — ganz ohne
-menschliches Eingreifen und ohne ein einziges Byte an eine Drittanbieter-Cloud zu senden,
-sofern *du* es nicht möchtest.
-
-Sie richtet sich an KI- und DevOps-Ingenieure, die volle Kontrolle wollen: das LLM
-austauschen, den Vektorindex besitzen, den gesamten Stack selbst hosten und jede Zeile
-des laufenden Codes lesen.
-
-### 🏗️ Kern-Architektur
-
-| Säule | Funktion |
-|---|---|
-| **🔀 Dual-Engine-LLM-Router** | Eine einzige `LLMClientBase`-Schnittstelle leitet die Inferenz an **Offline**-Engines (Ollama / Apple MLX mit Llama-3.1 / Qwen2.5) oder **Online**-APIs (OpenAI / Claude) weiter. Ein Engine-Wechsel ist ein Config-Flag — keine Code-Änderung. |
-| **🧠 Mandantenfähiges & mehrsprachiges RAG** | **Qdrant**-Vektorspeicher + **`BAAI/bge-m3`**-Embeddings ergeben einen gemeinsamen sprachübergreifenden Raum (VN/EN/DE/CN). Jedes `upsert`/`search` wird durch einen verpflichtenden `tenant_id`-Payload-Filter isoliert. |
-| **🕹️ Supervisor–Worker-Agentenmuster** | Ein Planner zerlegt die Absicht in einen Task-Graphen; spezialisierte Worker (Researcher → Creator → Critic → Publisher) laufen mit minimalem Kontext. Der Critic prüft die Faktenbasis, bevor etwas veröffentlicht wird. |
-| **📡 Omnichannel-Auto-Distribution** | **Redis + Celery** leeren asynchrone Jobs an **Playwright**-Headless-Browser, die auf Social-Plattformen veröffentlichen und menschliches Verhalten nachahmen, um Plattformlimits einzuhalten. |
-| **🌾 Autonomer Harvester** | Ein geplanter (Cron) **Playwright + Stealth**-Crawler, der **öffentliche** Daten beschafft, bereinigt und mit `tenant_id` in **Qdrant** ablegt — vollständig von den Agenten entkoppelt (*Datenaufnahme ≠ Inferenz*). Quellen stehen in `scraper_config.yaml`, niemals hartcodiert. |
-
-### 📂 Verzeichnisstruktur (Hexagonale Architektur)
-
-```
-n-assistant-core/
-├── app/
-│   ├── domain/          # Reine Geschäftsentitäten & Ports — keine Framework-Abhängigkeiten
-│   ├── application/     # Anwendungsfälle: Supervisor-Worker-Agenten-Orchestrierung
-│   ├── infrastructure/  # Getriebene Adapter: Qdrant, Redis/Celery, LLM-Clients, Playwright Harvester
-│   └── api/             # Treibender Adapter: FastAPI-Router, Schemas, DI-Verdrahtung
-├── scraper_config.yaml  # Harvester-Quellen — zero-hardcode (Chặng 0)
-├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # lokaler Stack: redis + qdrant + core-api (+ harvester-Profil)
-├── requirements.txt
-└── LICENSE              # MIT
-```
-
-Der Domänenkern hängt von nichts ab; die Außenwelt dockt über Ports an. Du kannst Qdrant,
-die LLM-Engine oder das Web-Framework ersetzen, ohne die Geschäftslogik anzufassen.
-
-### ⚡ Schnellstart
-
-```bash
-git clone https://github.com/nnkienn/n-assistant-core.git
-cd n-assistant-core
-docker compose up -d          # startet redis + qdrant + core-api
-
-curl http://localhost:8000/health
-# {"status":"ok","service":"core-api-opensource"}
-```
-
-Fertig — eine vollständige lokale KI-Engine unter `http://localhost:8000`.
-
-</details>
-
----
-
-<details>
-<summary><h2>🇨🇳 中文</h2></summary>
-
-### 🎯 项目愿景
-
-**N-Assistant Core** 是一款**完全本地运行**的多智能体 AI 推理引擎。它将 **RAG（检索增强生成）**
-大脑与由 **Playwright** 驱动的自动化臂膀融合在一起，使自治智能体能够自主研究、创作、审核并
-**跨多渠道发布内容**，全程无需人工介入；除非*你*主动选择，否则不会向任何第三方云端发送一个字节。
-
-它专为追求完全掌控的 AI 与 DevOps 工程师打造：随意更换 LLM、自主掌握向量索引、自托管整套技术
-栈，并能审阅运行其中的每一行代码。
-
-### 🏗️ 核心技术架构
-
-| 支柱 | 作用 |
-|---|---|
-| **🔀 双引擎 LLM 路由** | 单一的 `LLMClientBase` 接口将推理路由到**离线**引擎（运行 Llama-3.1 / Qwen2.5 的 Ollama / Apple MLX）或**在线** API（OpenAI / Claude）。切换引擎只需修改一个配置项——无需改动代码。 |
-| **🧠 多租户 & 多语言 RAG** | **Qdrant** 向量库 + **`BAAI/bge-m3`** 嵌入构建出统一的跨语言空间（越/英/德/中）。每一次 `upsert`/`search` 都通过强制的 `tenant_id` 负载过滤实现隔离。 |
-| **🕹️ Supervisor–Worker 智能体模式** | 规划者（Planner）将意图分解为任务图；专职 Worker（研究员 → 创作者 → 评审 → 发布者）各自以最小上下文运行。评审者在内容发布前校验其事实依据。 |
-| **📡 全渠道自动分发** | **Redis + Celery** 将异步任务下发给 **Playwright** 无头浏览器，模拟人类行为发布到各社交平台，以规避平台限流。 |
-| **🌾 自治采集器（Harvester）** | 定时（cron）运行的 **Playwright + Stealth** 爬虫，采集**公开**数据，清洗后带 `tenant_id` 写入 **Qdrant**——与智能体完全解耦（*数据采集 ≠ 推理*）。来源在 `scraper_config.yaml` 中声明，绝不硬编码。 |
-
-### 📂 目录结构（六边形架构）
-
-```
-n-assistant-core/
-├── app/
-│   ├── domain/          # 纯业务实体与端口——零框架依赖
-│   ├── application/     # 用例：Supervisor-Worker 智能体编排
-│   ├── infrastructure/  # 被驱动适配器：Qdrant、Redis/Celery、LLM 客户端、Playwright 采集器
-│   └── api/             # 驱动适配器：FastAPI 路由、模式、依赖注入装配
-├── scraper_config.yaml  # 采集器数据源——零硬编码（Chặng 0）
-├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # 本地技术栈：redis + qdrant + core-api（+ harvester profile）
-├── requirements.txt
-└── LICENSE              # MIT
-```
-
-领域核心不依赖任何东西；外部世界通过端口接入。你可以替换 Qdrant、LLM 引擎或 Web 框架，
-而无需触碰任何业务逻辑。
-
-### ⚡ 快速开始
-
-```bash
-git clone https://github.com/nnkienn/n-assistant-core.git
-cd n-assistant-core
-docker compose up -d          # 启动 redis + qdrant + core-api
-
-curl http://localhost:8000/health
-# {"status":"ok","service":"core-api-opensource"}
-```
-
-就这么简单——一个完整的本地 AI 引擎已运行在 `http://localhost:8000`。
-
-</details>
+- 🛡️ **`tenant_id` everywhere.** Every Vector DB op, cache key, and audit log MUST carry `tenant_id`.
+- 🧠 **Single embedding model.** `BAAI/bge-m3` is the only embedding allowed — no per-language model, no OpenAI ada.
+- 🔌 **`LLMClientBase` abstraction.** Agents call `client.complete(...)` — never `openai.ChatCompletion.*` or `transformers` directly.
+- ✅ **TDD mandatory.** Red → Green → Refactor. RAG/Agent logic needs **cross-language tests** (VN, EN, DE, CN).
+- 🔒 **Encrypted session vault.** Playwright cookies → AES-256 → storage. Never plain-text.
+- 🌾 **Zero-hardcode harvesting.** Scraping targets live in `scraper_config.yaml`, public pages only, robots.txt respected.
 
 ---
 
 <div align="center">
 
 **License:** [MIT](LICENSE) · Free to use, modify, and self-host. Built for the open-source AI community. 🌍
+
+📞 **nnkienn@gmail.com**
 
 </div>
