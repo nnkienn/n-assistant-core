@@ -40,6 +40,7 @@ vector index, self-host the whole stack, and read every line of the code that ru
 | **🧠 Multi-tenant & Multilingual RAG** | **Qdrant** vector store + **`BAAI/bge-m3`** embeddings give one shared cross-lingual space (VN/EN/DE/CN). Every `upsert`/`search` is isolated by a mandatory `tenant_id` payload filter. |
 | **🕹️ Supervisor–Worker Agentic Pattern** | A Planner decomposes intent into a task graph; specialized workers (Researcher → Creator → Critic → Publisher) each run with minimal context. The Critic verifies grounding before anything ships. |
 | **📡 Omnichannel Auto-Distribution** | **Redis + Celery** drain async jobs to **Playwright** headless browsers that publish to social platforms, mimicking human behavior to stay within platform limits. |
+| **🌾 Autonomous Harvester** | A scheduled (cron) **Playwright + Stealth** crawler that acquires **public** data, cleans it, and lands it into **Qdrant** tagged by `tenant_id` — fully decoupled from the agents (*Data Ingestion ≠ Inference*). Sources live in `scraper_config.yaml`, never hardcoded. |
 
 ### 📂 Directory Structure (Hexagonal Architecture)
 
@@ -48,10 +49,11 @@ n-assistant-core/
 ├── app/
 │   ├── domain/          # Pure business entities & ports — zero framework deps
 │   ├── application/     # Use cases: Supervisor-Worker agent orchestration
-│   ├── infrastructure/  # Driven adapters: Qdrant, Redis/Celery, LLM clients, Playwright
+│   ├── infrastructure/  # Driven adapters: Qdrant, Redis/Celery, LLM clients, Playwright Harvester
 │   └── api/             # Driving adapter: FastAPI routers, schemas, DI wiring
+├── scraper_config.yaml  # Harvester sources — zero-hardcode (Chặng 0)
 ├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # local stack: redis + qdrant + core-api
+├── docker-compose.yml   # local stack: redis + qdrant + core-api (+ harvester profile)
 ├── requirements.txt
 └── LICENSE              # MIT
 ```
@@ -96,6 +98,7 @@ chỉ mục vector, tự host toàn bộ hệ thống, và đọc được từn
 | **🧠 RAG Đa người dùng & Đa ngôn ngữ** | Vector store **Qdrant** + embedding **`BAAI/bge-m3`** tạo một không gian xuyên ngôn ngữ chung (VN/EN/DE/CN). Mọi `upsert`/`search` đều bị cô lập bằng bộ lọc payload `tenant_id` bắt buộc. |
 | **🕹️ Mô hình Agentic Supervisor–Worker** | Một Planner phân rã ý định thành đồ thị tác vụ; các worker chuyên biệt (Researcher → Creator → Critic → Publisher) chạy với ngữ cảnh tối thiểu. Critic kiểm chứng tính xác thực trước khi xuất bản. |
 | **📡 Tự động Phân phối Đa kênh** | **Redis + Celery** rút hàng đợi tác vụ bất đồng bộ tới trình duyệt headless **Playwright** để đăng lên các nền tảng mạng xã hội, mô phỏng hành vi người dùng để tránh giới hạn nền tảng. |
+| **🌾 Harvester Tự hành** | Trình thu thập **Playwright + Stealth** chạy định kỳ (cron) cào dữ liệu **công khai**, làm sạch và nạp vào **Qdrant** kèm `tenant_id` — tách biệt hoàn toàn khỏi agent (*Thu thập dữ liệu ≠ Suy luận*). Nguồn khai báo trong `scraper_config.yaml`, không hardcode. |
 
 ### 📂 Cấu trúc thư mục (Kiến trúc Hexagonal)
 
@@ -104,10 +107,11 @@ n-assistant-core/
 ├── app/
 │   ├── domain/          # Thực thể nghiệp vụ thuần & các port — không phụ thuộc framework
 │   ├── application/     # Use case: điều phối agent Supervisor-Worker
-│   ├── infrastructure/  # Adapter bị điều khiển: Qdrant, Redis/Celery, LLM client, Playwright
+│   ├── infrastructure/  # Adapter bị điều khiển: Qdrant, Redis/Celery, LLM client, Playwright Harvester
 │   └── api/             # Adapter điều khiển: router FastAPI, schema, nối DI
+├── scraper_config.yaml  # Nguồn cào của Harvester — zero-hardcode (Chặng 0)
 ├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # stack local: redis + qdrant + core-api
+├── docker-compose.yml   # stack local: redis + qdrant + core-api (+ profile harvester)
 ├── requirements.txt
 └── LICENSE              # MIT
 ```
@@ -156,6 +160,7 @@ des laufenden Codes lesen.
 | **🧠 Mandantenfähiges & mehrsprachiges RAG** | **Qdrant**-Vektorspeicher + **`BAAI/bge-m3`**-Embeddings ergeben einen gemeinsamen sprachübergreifenden Raum (VN/EN/DE/CN). Jedes `upsert`/`search` wird durch einen verpflichtenden `tenant_id`-Payload-Filter isoliert. |
 | **🕹️ Supervisor–Worker-Agentenmuster** | Ein Planner zerlegt die Absicht in einen Task-Graphen; spezialisierte Worker (Researcher → Creator → Critic → Publisher) laufen mit minimalem Kontext. Der Critic prüft die Faktenbasis, bevor etwas veröffentlicht wird. |
 | **📡 Omnichannel-Auto-Distribution** | **Redis + Celery** leeren asynchrone Jobs an **Playwright**-Headless-Browser, die auf Social-Plattformen veröffentlichen und menschliches Verhalten nachahmen, um Plattformlimits einzuhalten. |
+| **🌾 Autonomer Harvester** | Ein geplanter (Cron) **Playwright + Stealth**-Crawler, der **öffentliche** Daten beschafft, bereinigt und mit `tenant_id` in **Qdrant** ablegt — vollständig von den Agenten entkoppelt (*Datenaufnahme ≠ Inferenz*). Quellen stehen in `scraper_config.yaml`, niemals hartcodiert. |
 
 ### 📂 Verzeichnisstruktur (Hexagonale Architektur)
 
@@ -164,10 +169,11 @@ n-assistant-core/
 ├── app/
 │   ├── domain/          # Reine Geschäftsentitäten & Ports — keine Framework-Abhängigkeiten
 │   ├── application/     # Anwendungsfälle: Supervisor-Worker-Agenten-Orchestrierung
-│   ├── infrastructure/  # Getriebene Adapter: Qdrant, Redis/Celery, LLM-Clients, Playwright
+│   ├── infrastructure/  # Getriebene Adapter: Qdrant, Redis/Celery, LLM-Clients, Playwright Harvester
 │   └── api/             # Treibender Adapter: FastAPI-Router, Schemas, DI-Verdrahtung
+├── scraper_config.yaml  # Harvester-Quellen — zero-hardcode (Chặng 0)
 ├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # lokaler Stack: redis + qdrant + core-api
+├── docker-compose.yml   # lokaler Stack: redis + qdrant + core-api (+ harvester-Profil)
 ├── requirements.txt
 └── LICENSE              # MIT
 ```
@@ -212,6 +218,7 @@ Fertig — eine vollständige lokale KI-Engine unter `http://localhost:8000`.
 | **🧠 多租户 & 多语言 RAG** | **Qdrant** 向量库 + **`BAAI/bge-m3`** 嵌入构建出统一的跨语言空间（越/英/德/中）。每一次 `upsert`/`search` 都通过强制的 `tenant_id` 负载过滤实现隔离。 |
 | **🕹️ Supervisor–Worker 智能体模式** | 规划者（Planner）将意图分解为任务图；专职 Worker（研究员 → 创作者 → 评审 → 发布者）各自以最小上下文运行。评审者在内容发布前校验其事实依据。 |
 | **📡 全渠道自动分发** | **Redis + Celery** 将异步任务下发给 **Playwright** 无头浏览器，模拟人类行为发布到各社交平台，以规避平台限流。 |
+| **🌾 自治采集器（Harvester）** | 定时（cron）运行的 **Playwright + Stealth** 爬虫，采集**公开**数据，清洗后带 `tenant_id` 写入 **Qdrant**——与智能体完全解耦（*数据采集 ≠ 推理*）。来源在 `scraper_config.yaml` 中声明，绝不硬编码。 |
 
 ### 📂 目录结构（六边形架构）
 
@@ -220,10 +227,11 @@ n-assistant-core/
 ├── app/
 │   ├── domain/          # 纯业务实体与端口——零框架依赖
 │   ├── application/     # 用例：Supervisor-Worker 智能体编排
-│   ├── infrastructure/  # 被驱动适配器：Qdrant、Redis/Celery、LLM 客户端、Playwright
+│   ├── infrastructure/  # 被驱动适配器：Qdrant、Redis/Celery、LLM 客户端、Playwright 采集器
 │   └── api/             # 驱动适配器：FastAPI 路由、模式、依赖注入装配
+├── scraper_config.yaml  # 采集器数据源——零硬编码（Chặng 0）
 ├── Dockerfile           # python:3.11-slim → uvicorn :8000
-├── docker-compose.yml   # 本地技术栈：redis + qdrant + core-api
+├── docker-compose.yml   # 本地技术栈：redis + qdrant + core-api（+ harvester profile）
 ├── requirements.txt
 └── LICENSE              # MIT
 ```
