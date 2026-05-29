@@ -60,3 +60,30 @@ services:
         condition: service_started
     networks:
       - core_net
+
+  # Chặng 0 — Harvester: autonomous public-data acquisition (Playwright + Stealth,
+  # cron). Separate process from core-api/agents (Data Ingestion != Inference).
+  # Reads scraper_config.yaml (zero-hardcode). Enable with: docker compose --profile harvester up
+  # NOTE: needs Playwright browsers — when app/infrastructure/harvester ships, switch
+  # the build to a Playwright base image (mcr.microsoft.com/playwright/python).
+  harvester:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: core-harvester
+    profiles: ["harvester"]
+    command: ["python", "-m", "app.infrastructure.harvester.scheduler"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      QDRANT_URL: http://qdrant:6333
+      SCRAPER_CONFIG: /app/scraper_config.yaml
+    volumes:
+      - ./scraper_config.yaml:/app/scraper_config.yaml:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    networks:
+      - core_net

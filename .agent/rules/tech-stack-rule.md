@@ -62,3 +62,15 @@ identity, auth, or money itself.
 | 3.2 | Approved dependencies only. Adding anything outside the table in §0 requires an RFC. |
 | 3.3 | Core MUST start and pass `GET /health` with **no** secrets from the commercial layer present. |
 | 3.4 | Cross-repo calls go only through the documented REST/WebSocket API — never a shared private package. |
+
+---
+
+## §4. Harvester (Chặng 0 — Data Ingestion, binding)
+
+| # | Rule |
+|---|---|
+| 4.1 | **Data Ingestion ≠ Inference.** The Harvester MUST NOT call an LLM, import agent code, or share a process with the agent graph. It only acquires and lands data. |
+| 4.2 | **Zero-hardcode sources.** Every scraping target lives in `scraper_config.yaml` (URL, selectors, cadence, locale, `tenant_id`). A hardcoded URL literal in Python is an instant reject. |
+| 4.3 | **Public data only.** Never scrape login-walled, private, or another tenant's PII data. Respect `robots.txt` / platform ToS; rate-limit per source. |
+| 4.4 | **`tenant_id` at the source.** Every harvested raw artifact is stamped with `tenant_id` at the Harvester layer (first landing). An artifact missing `tenant_id` is discarded, never ingested. |
+| 4.5 | Pipeline order is fixed: **Crawl → Raw Data Lake → Filter (Clean) → Qdrant upsert** (with `tenant_id` payload filter). No skipping the clean stage. |

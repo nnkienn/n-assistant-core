@@ -20,8 +20,10 @@ enforceable open-source boundary rules.
 ═══════════════════════════════════════════════════════════════════════════
 -->
 
-# 🌍 MASTER GLOBAL ARCHITECTURE SPECIFICATION — N ASSISTANT V2.0
+# 🌍 MASTER GLOBAL ARCHITECTURE SPECIFICATION — N ASSISTANT V3.0
 
+> **V3.0 changelog (Zero-Hardcode & Full-Harvester Integration):** adds §3.8 Harvester Layer (autonomous data acquisition, fully separated from inference); confirms **Qdrant** as the single vector store (supersedes earlier ChromaDB drafts); canonical roadmap moves to [`master-execution-plan.md`](master-execution-plan.md) with a new **Chặng 0 — Harvester Engine**.
+>
 > **DOCUMENT CLASSIFICATION:** Core engineering spec. Binding for every AI agent and human contributor on the project.
 > **PROJECT VISION:** N Assistant is a Multi-tenant B2B SaaS AI Marketing Agent on the "Open-Core" model. Three architectural guarantees: (1) tenant data isolation via `tenant_id`-scoped RAG, (2) Hybrid Dual-Engine inference (Local + Cloud), (3) Omnichannel auto-upload via Playwright.
 > **LANGUAGES SUPPORTED END-TO-END:** Vietnamese (VN), English (EN), German (DE), Chinese (CN).
@@ -138,6 +140,41 @@ Routing decision is config (`INFERENCE_MODE=local|cloud|hybrid`), not code. Agen
 - **Tracing:** OpenTelemetry → Tempo/Jaeger.
 - **Audit log:** every tool call writes `(tenant_id, agent, tool, input_hash, output_hash, model_version, latency_ms, cost_usd)` to an immutable Postgres table partitioned by `tenant_id`.
 - **PII boundary:** tenant content is logged as content-hashes, not raw text.
+
+### §3.8 Harvester Layer (Data Ingestion — strictly separate from Inference)
+
+The Harvester is an **autonomous data-acquisition subsystem**, fully decoupled
+from the LLM agent graph. It enforces a hard separation of concerns:
+**Data Ingestion ≠ Inference.** The Harvester only *acquires and lands* data; it
+never reasons, never calls an LLM, and shares no process with the agents.
+
+- **Engine:** Playwright (headless) + `playwright-stealth`, driven on a schedule
+  by **Celery Beat (cronjob)**. Per-tenant residential proxy rotation.
+- **Zero-hardcode sources:** every scraping target is declared in
+  **`scraper_config.yaml`** (URL, selectors, cadence, locale, `tenant_id`).
+  **No URL is ever hardcoded in Python.** Reloading the YAML reconfigures the
+  harvester without a redeploy.
+- **Pipeline (4 stages):**
+  1. **Crawl** — Playwright fetches the configured *public* pages.
+  2. **Raw Data Lake** — raw HTML/JSON landed immutably (object storage / FS),
+     stamped with `{tenant_id, source, harvested_at}` **at this layer already**.
+  3. **Filter (Clean)** — boilerplate strip, dedupe, PII scrub, language detect.
+  4. **Vector Ingestion** — cleaned chunks → `BAAI/bge-m3` → **Qdrant** upsert
+     with the mandatory `tenant_id` payload filter (same isolation moat as §3.3).
+- **Isolation from agents:** the Harvester *writes* to Qdrant; the Researcher
+  agent (`ai-agent-design.md` §3.2) only *reads*. They never call each other.
+
+**Compliance (binding):**
+- Harvest **public data only**. Never scrape another tenant's private/PII data;
+  no login-walled or personal content outside the tenant's own authorized sources.
+- **`tenant_id` is stamped at the Harvester layer** — on the very first raw file,
+  not bolted on downstream. A harvested artifact missing `tenant_id` is discarded.
+- Respect `robots.txt` / platform ToS; rate-limit per source.
+
+**Cross-repo control:** the Harvester engine lives in **`n-assistant-core`** (MIT).
+The commercial **`n-assistant-cloud`** layer provides the customer-facing UI to
+configure scraping targets, persists them, and pushes them to core via the
+documented Harvester REST API (`/v1/harvester/*`) — cloud never runs Playwright itself.
 
 ---
 

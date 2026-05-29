@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Harvester source configuration (Chặng 0) — ZERO-HARDCODE.
+# Every scraping target is declared here, never in Python.
+# The cloud layer's config UI writes/overwrites this file via core's
+# /v1/harvester/* API. Reloading reconfigures the harvester without a redeploy.
+#
+# Compliance (binding — see .agent/rules/tech-stack-rule.md §4 / §10):
+#   - PUBLIC pages only. No login-walled, private, or other-tenant PII.
+#   - Every source MUST carry a tenant_id (stamped onto raw artifacts at harvest).
+#   - Respect robots.txt / ToS; honor per-source rate limits.
+# ═══════════════════════════════════════════════════════════════════════════
+
+defaults:
+  engine: playwright          # playwright (JS/stealth) | httpx (static HTML)
+  stealth: true               # playwright-stealth on
+  rate_limit_per_min: 10
+  respect_robots_txt: true
+  locale: vi
+
+sources:
+  - id: example-public-blog
+    tenant_id: "00000000-0000-0000-0000-000000000001"   # REQUIRED on every source
+    url: "https://example.com/blog"                      # PUBLIC url only
+    cadence: "0 */6 * * *"                                # cron: every 6 hours
+    locale: vi
+    selectors:
+      item: "article.post"
+      title: "h1.post-title"
+      body: "div.post-content"
+    proxy_pool: tenant-001-residential                   # rotated per run
+
+  - id: example-public-news
+    tenant_id: "00000000-0000-0000-0000-000000000002"
+    url: "https://news.example.org/category/tech"
+    cadence: "0 2 * * *"                                  # cron: daily at 02:00
+    locale: en
+    engine: httpx                                         # static page → lightweight
+    selectors:
+      item: "li.headline"
+      title: "a.headline-link"
+      body: "p.summary"
