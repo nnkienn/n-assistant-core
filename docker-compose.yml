@@ -1,0 +1,61 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# n-assistant-core — COMMUNITY compose (MIT, open-source)
+# Standalone stack for anyone who clones the public repo and runs it locally.
+# Contains NO SaaS infra (no Postgres, no auth, no billing).
+#
+#   docker compose up --build
+# ═══════════════════════════════════════════════════════════════════════════
+
+networks:
+  core_net:
+    driver: bridge
+
+volumes:
+  qdrant_data:
+  redis_data:
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: core-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - core_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: core-qdrant
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - core_net
+
+  core-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: core-api
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      QDRANT_URL: http://qdrant:6333
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    networks:
+      - core_net
