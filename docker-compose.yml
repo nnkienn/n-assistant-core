@@ -15,11 +15,12 @@ volumes:
   redis_data:
 
 services:
+  # ── Redis — cache & Celery broker ──────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: core-redis
     ports:
-      - "6379:6379"
+      - "6399:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -30,17 +31,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── Qdrant — vector database ───────────────────────────────────────────
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.8.4
     container_name: core-qdrant
     ports:
-      - "6333:6333"   # REST
-      - "6334:6334"   # gRPC
+      - "6353:6333"   # REST
+      - "6354:6334"   # gRPC
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
       - core_net
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ── Core API — FastAPI application ─────────────────────────────────────
   core-api:
     image: n-assistant-core-api:local-dev
     build:
@@ -48,24 +56,23 @@ services:
       dockerfile: Dockerfile
     container_name: core-api
     ports:
-      - "8000:8000"
+      - "8100:8000"
+    env_file:
+      - .env
     environment:
+      # Service-discovery overrides (container hostnames)
       REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
       QDRANT_URL: http://qdrant:6333
     depends_on:
       redis:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
     networks:
       - core_net
 
-  # Chặng 0 — Harvester: autonomous public-data acquisition (Playwright + Stealth,
-  # cron). Separate process from core-api/agents (Data Ingestion != Inference).
-  # Reads scraper_config.yaml (zero-hardcode). Enable with: docker compose --profile harvester up
-  # NOTE: needs Playwright browsers — when app/infrastructure/harvester ships, switch
-  # the build to a Playwright base image (mcr.microsoft.com/playwright/python).
+  # ── Harvester (Chặng 0) — autonomous data acquisition ─────────────────
+  # Enable with: docker compose --profile harvester up
   harvester:
     build:
       context: .
@@ -73,6 +80,8 @@ services:
     container_name: core-harvester
     profiles: ["harvester"]
     command: ["python", "-m", "app.infrastructure.harvester.scheduler"]
+    env_file:
+      - .env
     environment:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/1
@@ -84,6 +93,6 @@ services:
       redis:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
     networks:
       - core_net

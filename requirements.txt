@@ -1,16 +1,19 @@
 # n-assistant-core (MIT, open-source) — Python 3.11
-# Web framework
+# ─── Web framework ─────────────────────────────────────────────────────────
 fastapi>=0.115,<0.117
 uvicorn[standard]>=0.32,<0.33
 pydantic>=2.9,<3.0
 pydantic-settings>=2.6,<3.0
 
-# Persistence
-sqlalchemy>=2.0,<2.1
+# ─── LLM client (OpenAI-compatible) ───────────────────────────────────────
+openai>=1.40,<2.0
 
-# Vector DB (RAG)
+# ─── Observability ────────────────────────────────────────────────────────
+structlog>=24.4,<26.0
+
+# ─── Vector DB (RAG) ──────────────────────────────────────────────────────
 qdrant-client>=1.12,<2.0
 
-# Async jobs
+# ─── Async jobs / cache ───────────────────────────────────────────────────
 celery>=5.4,<6.0
 redis>=5.2,<6.0

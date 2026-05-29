@@ -1,0 +1,22 @@
+{
+  "name": "N-Assistant Core",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "core-api",
+  "workspaceFolder": "/app",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.languageServer": "Pylance"
+      }
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt"
+}
