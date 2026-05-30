@@ -14,6 +14,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy application code
 COPY app ./app
 
+# Harvester (Chặng 0): default source registry + manual test runner
+COPY scraper_config.yaml run_harvester.py ./
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

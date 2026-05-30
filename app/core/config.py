@@ -41,6 +41,18 @@ class Settings(BaseSettings):
     # ── Cache / Broker (Redis) ──────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6399/0"
 
+    # ── Harvester engine (Chặng 0) ──────────────────────────────────────
+    # Zero-hardcode: every scrape target lives in this YAML, never in code.
+    HARVESTER_CONFIG_PATH: str = "scraper_config.yaml"
+    # Immutable raw landing zone; partitioned per-tenant for isolation.
+    RAW_DATA_LAKE_PATH: str = "raw_data_lake/texts"
+    # Network etiquette for plugins that hit public HTTP endpoints.
+    HARVESTER_USER_AGENT: str = "n-assistant-harvester/3.0 (+https://github.com/nnkienn/n-assistant-core)"
+    HARVESTER_HTTP_TIMEOUT: float = 20.0
+    # TLS verification for HTTP plugins. Keep True. Set False (or point a source's
+    # `ca_bundle` at a CA file) only behind a TLS-intercepting proxy/firewall.
+    HARVESTER_HTTP_VERIFY: bool = True
+
     # ── Application ─────────────────────────────────────────────────────
     APP_NAME: str = "N Assistant — Core API (Open-Source)"
     APP_VERSION: str = "0.1.0"

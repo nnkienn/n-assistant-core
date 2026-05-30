@@ -72,27 +72,27 @@ services:
       - core_net
 
   # ── Harvester (Chặng 0) — autonomous data acquisition ─────────────────
-  # Enable with: docker compose --profile harvester up
+  # One-shot manual test run:
+  #   docker compose --profile harvester run --rm --build harvester
+  # (Celery Beat cron scheduling is a later Chặng 0 workstream item.)
   harvester:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.harvester   # ships Chromium for Playwright plugins
     container_name: core-harvester
     profiles: ["harvester"]
-    command: ["python", "-m", "app.infrastructure.harvester.scheduler"]
+    command: ["python", "run_harvester.py"]
     env_file:
       - .env
     environment:
       REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
       QDRANT_URL: http://qdrant:6333
-      SCRAPER_CONFIG: /app/scraper_config.yaml
+      HARVESTER_CONFIG_PATH: /app/scraper_config.yaml
+      RAW_DATA_LAKE_PATH: /app/raw_data_lake/texts
     volumes:
+      # Live-editable source registry (no rebuild to change targets).
       - ./scraper_config.yaml:/app/scraper_config.yaml:ro
-    depends_on:
-      redis:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
+      # Persist harvested raw JSON onto the host for inspection.
+      - ./raw_data_lake:/app/raw_data_lake
     networks:
       - core_net
