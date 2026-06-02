@@ -108,7 +108,7 @@ Implementation: LangGraph state machine. Each agent is a node, edges are conditi
 - **Goal:** Verify the draft against three checks before it gets published:
   1. **Brand voice** — match tenant's brand-voice rubric (stored in their RAG).
   2. **Claim grounding** — every claim links back to a Researcher source ID. Untraceable → FAIL.
-  3. **Policy** — platform-specific (TikTok/YT/FB) content policy heuristics.
+  3. **Policy** — platform-specific (YT/FB) content policy heuristics.
 - **Output:** `{verdict: "pass" | "fail", reasons: [...], suggested_edits: [...]}`.
 - **Loop:** on FAIL, hand back to Creator with `suggested_edits`. Max **3 retries**; on 4th attempt Supervisor escalates to human review.
 - **Forbidden:** rewriting the draft itself (its job is to judge, not to ghost-write).
@@ -149,7 +149,7 @@ class PublishToPlatformInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     tenant_id: UUID
     asset_id: UUID
-    platform: Literal["tiktok", "youtube_shorts", "facebook", "instagram"]
+    platform: Literal["youtube_shorts", "facebook", "instagram"]
     schedule_at: datetime | None = None
 ```
 

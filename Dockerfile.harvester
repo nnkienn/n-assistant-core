@@ -1,6 +1,6 @@
 # n-assistant-core — Harvester image (Chặng 0)
-# Separate from the core-api image: this one ships the Chromium browser needed
-# by Playwright-based plugins (e.g. x_playwright). Keeps core-api slim.
+# Plugins: x_twscrape (GraphQL API) + youtube_shorts (yt-dlp).
+# No Chromium needed — twscrape and yt-dlp handle everything without a browser.
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -9,14 +9,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Python deps first for layer caching.
 COPY requirements.txt ./
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Chromium + its OS-level dependencies for headless scraping.
-RUN playwright install --with-deps chromium
-
-# Application code + harvester config / runner.
 COPY app ./app
 COPY scraper_config.yaml run_harvester.py ./
 

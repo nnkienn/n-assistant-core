@@ -6,7 +6,7 @@ Responsibilities (and nothing more):
    ``{PLUGIN_TYPE: class}`` registry. The engine never imports a plugin by name
    (zero-hardcode rule), so adding a source = dropping one file.
 2. **Run each source in isolation.** Every source is wrapped in try/except: a
-   crashing plugin (e.g. TikTok anti-bot change) is logged and skipped; the rest
+   crashing plugin (e.g. X layout change) is logged and skipped; the rest
    keep running. The engine never goes down because of one bad source.
 3. **Stamp & land.** Tag each item with ``{tenant_id, harvested_at}`` and write
    an immutable JSON envelope into the Raw Data Lake, partitioned per tenant.
@@ -21,6 +21,7 @@ import json
 import os
 import pkgutil
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -176,6 +177,61 @@ class HarvesterEngine:
         written = self._persist(source, items)
         log.info("source_ok", items=written)
         return {"source": source.name, "status": "ok", "items": written}
+
+    # ── Raw Data Lake cleanup (TTL) ─────────────────────────────────────
+    def cleanup(self, ttl_hours: int | None = None) -> dict[str, int]:
+        """Delete files in the Raw Data Lake older than ``ttl_hours``.
+
+        Removes both ``.json`` envelopes and any media files (``.mp4``,
+        ``.webm``, ``.m4a``, …). After deletion, prunes empty directories.
+        Returns a summary ``{deleted_files, deleted_dirs, skipped}``.
+
+        Args:
+            ttl_hours: Override the setting value. Pass 0 to disable.
+        """
+        effective_ttl = ttl_hours if ttl_hours is not None else settings.RAW_DATA_LAKE_TTL_HOURS
+        if effective_ttl <= 0:
+            logger.info("cleanup_skipped", reason="TTL disabled (RAW_DATA_LAKE_TTL_HOURS=0)")
+            return {"deleted_files": 0, "deleted_dirs": 0, "skipped": 0}
+
+        cutoff = time.time() - effective_ttl * 3600
+        deleted_files = 0
+        skipped = 0
+
+        if not self.data_lake_path.exists():
+            return {"deleted_files": 0, "deleted_dirs": 0, "skipped": 0}
+
+        for file in self.data_lake_path.rglob("*"):
+            if not file.is_file():
+                continue
+            try:
+                if file.stat().st_mtime < cutoff:
+                    file.unlink()
+                    deleted_files += 1
+                    logger.debug("cleanup_deleted", path=str(file))
+                else:
+                    skipped += 1
+            except OSError as exc:
+                logger.warning("cleanup_delete_failed", path=str(file), error=str(exc))
+
+        # Prune directories that are now empty (deepest first).
+        deleted_dirs = 0
+        for directory in sorted(self.data_lake_path.rglob("*"), reverse=True):
+            if directory.is_dir() and not any(directory.iterdir()):
+                try:
+                    directory.rmdir()
+                    deleted_dirs += 1
+                except OSError:
+                    pass
+
+        logger.info(
+            "cleanup_complete",
+            ttl_hours=effective_ttl,
+            deleted_files=deleted_files,
+            deleted_dirs=deleted_dirs,
+            skipped=skipped,
+        )
+        return {"deleted_files": deleted_files, "deleted_dirs": deleted_dirs, "skipped": skipped}
 
     # ── Raw Data Lake persistence ───────────────────────────────────────
     def _persist(self, source: SourceConfig, items: list[HarvestedItem]) -> int:

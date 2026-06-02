@@ -23,7 +23,7 @@
 
 **N-Assistant Core** 是一款**完全本地运行**的多智能体 AI 推理引擎。
 
-它将**多租户、多语言的 RAG（检索增强生成）**大脑与由 **Playwright** 驱动的自动化臂膀融合在一起，使自治智能体能够自主**研究 → 创作 → 审核 → 发布**内容，覆盖 TikTok、YouTube、Facebook 与 Instagram——全程无需人工介入；除非*你*主动选择，否则不会向任何第三方云端发送一个字节。
+它将**多租户、多语言的 RAG（检索增强生成）**大脑与由 **Playwright** 驱动的自动化臂膀融合在一起，使自治智能体能够自主**研究 → 创作 → 审核 → 发布**内容，覆盖 YouTube、Facebook 与 Instagram——全程无需人工介入；除非*你*主动选择，否则不会向任何第三方云端发送一个字节。
 
 它专为追求完全掌控的 AI 与 DevOps 工程师打造：随意更换 LLM、自主掌握向量索引、自托管整套技术栈，并能审阅运行其中的每一行代码。
 
@@ -59,7 +59,7 @@
 
 ### 4. 📡 全渠道自动分发
 **Redis + Celery** 将异步任务下发给 **Playwright** 无头浏览器，模拟人类行为发布内容，以规避平台限流：
-- TikTok / 抖音 · YouTube Shorts · Facebook · Instagram Reels。
+- YouTube Shorts · Facebook · Instagram Reels。
 - 会话 Cookie 以 **AES-256 加密**存储（绝不明文）。
 - 使用 `playwright-stealth` 规避机器人检测。
 - 按租户时区 + 高峰时段启发式排程。

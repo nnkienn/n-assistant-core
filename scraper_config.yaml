@@ -19,16 +19,65 @@
 # Compliance (binding — see .agent/rules/tech-stack-rule.md §4 / §10):
 #   - PUBLIC pages only. No login-walled private or other-tenant PII.
 #   - Respect robots.txt / ToS; honor per-source rate limits.
+#
+# Focus: AI content ecosystem — X (twscrape) + YouTube Shorts (yt-dlp).
 # ═══════════════════════════════════════════════════════════════════════════
 
 sources:
-  # X (Twitter) via headless Playwright + injected session cookie.
-  - name: x-elonmusk-trending
-    type: x_playwright
+  # ── X — AI trending (twscrape) ──────────────────────────────────────────
+  # GraphQL API: structured JSON + native video URLs. Needs auth_token + ct0.
+  # Get both from browser devtools → Application → Cookies → x.com.
+  - name: x-ai-trending
+    type: x_twscrape
     tenant_id: tenant_demo
     enabled: true
     options:
-      target_url: "https://x.com/elonmusk"
-      auth_token: "${X_AUTH_TOKEN}"   # resolved from .env, never hardcoded
-      limit: 10
-      wait_timeout_ms: 8000
+      query: "AI agent since:2026-06-02 lang:en"
+      limit: 50
+      auth_token: "${X_AUTH_TOKEN}"
+      ct0: "${X_CT0_TOKEN}"
+      product: "Top"
+
+  - name: x-ai-tools
+    type: x_twscrape
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: "#AItools OR #LLM OR #GenerativeAI since:2026-06-02"
+      limit: 50
+      auth_token: "${X_AUTH_TOKEN}"
+      ct0: "${X_CT0_TOKEN}"
+      product: "Top"
+
+  # ── YouTube Shorts — AI topic search (yt-dlp) ───────────────────────────
+  # Searches YouTube by keyword, filters to Shorts (≤60 s). No API key needed.
+  # Set download_video: true to save mp4 files to the Raw Data Lake.
+  - name: youtube-shorts-ai-trends
+    type: youtube_shorts
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: "AI tools 2025"
+      limit: 20
+      download_video: false
+      max_duration_s: 60
+
+  - name: youtube-shorts-ai-agents
+    type: youtube_shorts
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: "AI agent automation 2025"
+      limit: 20
+      download_video: false
+      max_duration_s: 60
+
+  - name: youtube-shorts-llm-news
+    type: youtube_shorts
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: "LLM news latest"
+      limit: 15
+      download_video: false
+      max_duration_s: 60

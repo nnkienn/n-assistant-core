@@ -23,7 +23,7 @@
 
 **N-Assistant Core** ist eine Multi-Agenten-KI-Inferenz-Engine, die **zu 100 % lokal** läuft.
 
-Sie verbindet ein **mandantenfähiges, mehrsprachiges RAG-Gehirn (Retrieval-Augmented Generation)** mit einem von **Playwright** gesteuerten Automatisierungsarm, sodass autonome Agenten Inhalte **recherchieren → erstellen → prüfen → veröffentlichen** können — über TikTok, YouTube, Facebook & Instagram, ganz ohne menschliches Eingreifen und ohne ein einziges Byte an eine Drittanbieter-Cloud zu senden, sofern *du* es nicht möchtest.
+Sie verbindet ein **mandantenfähiges, mehrsprachiges RAG-Gehirn (Retrieval-Augmented Generation)** mit einem von **Playwright** gesteuerten Automatisierungsarm, sodass autonome Agenten Inhalte **recherchieren → erstellen → prüfen → veröffentlichen** können — über YouTube, Facebook & Instagram, ganz ohne menschliches Eingreifen und ohne ein einziges Byte an eine Drittanbieter-Cloud zu senden, sofern *du* es nicht möchtest.
 
 Sie richtet sich an KI- und DevOps-Ingenieure, die volle Kontrolle wollen: das LLM austauschen, den Vektorindex besitzen, den gesamten Stack selbst hosten und jede Zeile des laufenden Codes lesen.
 
@@ -59,7 +59,7 @@ Der Critic prüft die Faktenbasis, bevor etwas veröffentlicht wird.
 
 ### 4. 📡 Omnichannel-Auto-Distribution
 **Redis + Celery** leeren asynchrone Jobs an **Playwright**-Headless-Browser, die veröffentlichen und dabei menschliches Verhalten nachahmen, um Plattformlimits einzuhalten:
-- TikTok / Douyin · YouTube Shorts · Facebook · Instagram Reels.
+- YouTube Shorts · Facebook · Instagram Reels.
 - Session-Cookies werden **AES-256-verschlüsselt** gespeichert (niemals im Klartext).
 - `playwright-stealth` zur Umgehung der Bot-Erkennung.
 - Planung nach Mandanten-Zeitzone + Peak-Hour-Heuristik.

@@ -74,7 +74,6 @@ graph TD
     LLMRouter -->|Tier-2 Dev / Self-host| LocalLLM[Ollama / Apple MLX · Llama-3.1-8B / Qwen2.5]
 
     CeleryWorker -->|Auto-upload trigger| PlaywrightBot[Playwright Headless Browser]
-    PlaywrightBot --> TikTok[TikTok / Douyin]
     PlaywrightBot --> YouTube[YouTube Shorts]
     PlaywrightBot --> Facebook[FB / IG Reels]
 ```
@@ -124,7 +123,7 @@ Routing decision is config (`INFERENCE_MODE=local|cloud|hybrid`), not code. Agen
 ### §3.5 Omnichannel Distribution Layer
 
 - **Core:** Playwright (headless browser) mimicking human behavior to bypass platform API rate limits.
-- **Session vault:** Cookies/sessions for TikTok, Facebook, YouTube → encrypted with **AES-256** (Python `cryptography` lib) → stored in PostgreSQL `tenant_sessions`. **Never plain-text.**
+- **Session vault:** Cookies/sessions for Facebook, YouTube → encrypted with **AES-256** (Python `cryptography` lib) → stored in PostgreSQL `tenant_sessions`. **Never plain-text.**
 - **Bot-detection bypass:** `playwright-stealth`, residential proxy rotation per tenant.
 - **Scheduling:** peak-time heuristic per tenant timezone; queue drain ≤1 video per platform per hour to avoid spike-detection.
 

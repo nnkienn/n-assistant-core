@@ -47,6 +47,10 @@ class HarvestedItem(BaseModel):
     title: str = ""
     content: str = ""
     locale: str | None = None
+    # Remote media URLs (video/image) captured by the plugin.
+    media_urls: list[str] = Field(default_factory=list)
+    # Local path if the plugin downloaded a media file to disk.
+    media_path: str | None = None
     # Plugin-specific provenance (author, score, published_at, ...).
     metadata: dict[str, Any] = Field(default_factory=dict)
 

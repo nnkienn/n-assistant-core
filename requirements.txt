@@ -21,7 +21,11 @@ redis>=5.2,<6.0
 # ─── Harvester engine (Chặng 0) ───────────────────────────────────────────
 httpx>=0.27,<0.29
 PyYAML>=6.0,<7.0
-# Playwright-based plugins (e.g. x_playwright). The pip package alone lets the
-# engine import the plugin; running it also needs the Chromium browser binary
-# (`playwright install chromium` — see Dockerfile).
+# Playwright-based plugins (e.g. x_playwright, youtube_shorts).
+# Running also needs the Chromium binary: `playwright install chromium` (see Dockerfile).
 playwright>=1.47,<2.0
+# twscrape — X GraphQL API client (recommended over x_playwright for production).
+# Uses X's internal mobile-app endpoints; returns structured data + video URLs natively.
+twscrape>=0.14,<1.0
+# yt-dlp — video metadata extraction and optional download (YouTube Shorts, X videos).
+yt-dlp>=2024.1,<2026.0

@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     # TLS verification for HTTP plugins. Keep True. Set False (or point a source's
     # `ca_bundle` at a CA file) only behind a TLS-intercepting proxy/firewall.
     HARVESTER_HTTP_VERIFY: bool = True
+    # Auto-cleanup: delete raw data lake files older than this many hours.
+    # 0 = disabled. Applies to both .json envelopes and downloaded media files.
+    RAW_DATA_LAKE_TTL_HOURS: int = 72
 
     # ── Application ─────────────────────────────────────────────────────
     APP_NAME: str = "N Assistant — Core API (Open-Source)"
