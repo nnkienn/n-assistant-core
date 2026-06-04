@@ -32,7 +32,7 @@ sources:
     tenant_id: tenant_demo
     enabled: true
     options:
-      query: "AI agent since:2026-06-02 lang:en"
+      query: "AI agent since:2026-06-02 lang:en min_faves:200"
       limit: 50
       auth_token: "${X_AUTH_TOKEN}"
       ct0: "${X_CT0_TOKEN}"
@@ -43,11 +43,27 @@ sources:
     tenant_id: tenant_demo
     enabled: true
     options:
-      query: "#AItools OR #LLM OR #GenerativeAI since:2026-06-02"
+      query: "(#AItools OR #LLM OR #GenerativeAI) -(discord OR telegram OR airdrop) since:2026-06-02 min_faves:200"
       limit: 50
       auth_token: "${X_AUTH_TOKEN}"
       ct0: "${X_CT0_TOKEN}"
       product: "Top"
+
+  # ── X — Anti-spam high-signal AI/LLM source ─────────────────────────────
+  # Uses advanced operators to block spam AT THE SOURCE before any Python code
+  # runs: negative terms (crypto/nft/airdrop) + minimum engagement gate (200 faves).
+  # The content_filter_pipeline then applies 3 more layers on top.
+  - name: x-ai-antispam-hq
+    type: x_twscrape
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: '("Claude" OR "Cursor" OR "AI Agent" OR "LLM") -(crypto OR nft OR airdrop) min_faves:200'
+      limit: 100
+      auth_token: "${X_AUTH_TOKEN}"
+      ct0: "${X_CT0_TOKEN}"
+      product: "Top"
+      locale: en
 
   # ── YouTube Shorts — AI topic search (yt-dlp) ───────────────────────────
   # Searches YouTube by keyword, filters to Shorts (≤60 s). No API key needed.
@@ -81,3 +97,17 @@ sources:
       limit: 15
       download_video: false
       max_duration_s: 60
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 3-Layer Anti-Spam Filter Config (read by content_filter_pipeline.py)
+# These thresholds are intentionally strict: better to miss a borderline tweet
+# than to let junk pollute the script-generation context.
+# ═══════════════════════════════════════════════════════════════════════════
+filter_config:
+  heuristic:
+    # Maximum number of hashtags allowed — spam typically stacks 5+.
+    max_hashtags: 3
+    # Minimum word count — weeds out one-liners and pure engagement-bait.
+    min_words: 15
+    # Maximum @mentions — mass-mention threads are almost always off-topic.
+    max_mentions: 2

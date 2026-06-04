@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     INFERENCE_PROVIDER: str = "ollama"
     INFERENCE_MODEL: str = "hermes3"
     INFERENCE_BASE_URL: str = "http://localhost:11434/v1"
+    # For local Ollama this value is ignored; set to a real key when pointing
+    # INFERENCE_BASE_URL at OpenAI / Mistral / other cloud providers.
+    INFERENCE_API_KEY: str = "ollama"
 
     # ── Vector DB (Qdrant) ──────────────────────────────────────────────
     QDRANT_URL: str = "http://localhost:6353"
