@@ -80,9 +80,13 @@ services:
       # in .env to activate. Without this the container IP may get 403 on transcripts.
       - ./config/yt_cookies.txt:/app/config/yt_cookies.txt
 
-  # ── Harvester (Chặng 0) — autonomous data acquisition ─────────────────
-  # One-shot manual test run:
-  #   docker compose --profile harvester run --rm --build harvester
+  # ── Harvester (Chặng 0) — autonomous data acquisition + CLI runner ────
+  # This image ships cli.py, so it doubles as the unified CLI runner.
+  # Use the wrapper scripts (./nassistant.sh / .\nassistant.ps1) or call it
+  # directly — any cli.py subcommand overrides the default `harvest`:
+  #   docker compose --profile harvester run --rm harvester python cli.py list-plugins
+  #   docker compose --profile harvester run --rm harvester python cli.py harvest
+  #   docker compose --profile harvester run --rm harvester python cli.py filter
   # (Celery Beat cron scheduling is a later Chặng 0 workstream item.)
   harvester:
     build:
@@ -98,6 +102,10 @@ services:
       QDRANT_URL: http://qdrant:6333
       HARVESTER_CONFIG_PATH: /app/config/scraper_config.yaml
       RAW_DATA_LAKE_PATH: /app/raw_data_lake/texts
+    # Lets the container reach an Ollama server on the host / an SSH tunnel
+    # (INFERENCE_BASE_URL=http://host.docker.internal:11434/v1).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # Live-editable source registry (no rebuild to change targets).
       - ./config/scraper_config.yaml:/app/config/scraper_config.yaml:ro

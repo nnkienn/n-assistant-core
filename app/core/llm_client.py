@@ -15,6 +15,13 @@ Architecture rule (§2, tech-stack-rule.md):
     INFERENCE_MODEL    = gpt-4o-mini
     INFERENCE_API_KEY  = sk-...
 
+  Switching to Grok (xAI) — current Layer-3 default, OpenAI-compat:
+    INFERENCE_BASE_URL = https://api.x.ai/v1
+    INFERENCE_MODEL    = grok-4-fast-non-reasoning   # NON-reasoning: callers cap
+    INFERENCE_API_KEY  = xai-...                      # max_tokens low, so a
+                                                      # reasoning model can return
+                                                      # empty (budget spent thinking)
+
   Switching to Mistral / any OpenAI-compat endpoint:
     INFERENCE_BASE_URL = https://api.mistral.ai/v1
     INFERENCE_MODEL    = mistral-small-latest
@@ -30,9 +37,12 @@ Usage::
 
 from __future__ import annotations
 
+import structlog
 from openai import AsyncOpenAI
 
 from app.core.config import settings
+
+logger = structlog.get_logger(__name__)
 
 
 class LLMClientBase:
@@ -83,4 +93,18 @@ class LLMClientBase:
             max_tokens=max_tokens,
             temperature=temperature,
         )
+
+        # Token accounting — `cached` (when the provider reports it) is the slice
+        # of prompt tokens served from the prompt cache at a reduced rate.
+        usage = getattr(response, "usage", None)
+        if usage is not None:
+            details = getattr(usage, "prompt_tokens_details", None)
+            logger.debug(
+                "llm_usage",
+                model=self.model,
+                prompt=getattr(usage, "prompt_tokens", None),
+                completion=getattr(usage, "completion_tokens", None),
+                cached=getattr(details, "cached_tokens", None),
+            )
+
         return response.choices[0].message.content or ""

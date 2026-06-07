@@ -163,44 +163,46 @@ Vậy là xong — một động cơ AI local hoàn chỉnh tại `http://localh
 | Qdrant (vector DB) | http://localhost:6333 |
 | Redis (broker) | localhost:6379 |
 
-📖 **[HARVESTER_GUIDE.md](./HARVESTER_GUIDE.md)** — Hướng dẫn chuyên sâu Phase 1: kiến trúc plugin, tham chiếu CLI, cách thêm scraper mới trong 30 phút.
+📖 **[docs/HARVESTER_GUIDE.vi.md](./docs/HARVESTER_GUIDE.vi.md)** ([English](./docs/HARVESTER_GUIDE.md)) — Hướng dẫn chuyên sâu Chặng 1: kiến trúc plugin, tham chiếu CLI, cách thêm scraper mới trong 30 phút.
 
-**Chạy pipeline dữ liệu** — cào rồi lọc, thông qua CLI thống nhất:
+**Chạy pipeline dữ liệu** — cào rồi lọc, **hoàn toàn qua Docker** (không cần Python local, không cần venv). Một script wrapper mỏng chạy `cli.py` thống nhất *bên trong* container harvester:
 
 ```bash
-# Xem tất cả plugin đã đăng ký + trạng thái bật/tắt trong scraper_config.yaml
-python cli.py list-plugins
+# Linux / macOS: ./nassistant.sh <lệnh>      Windows: .\nassistant.ps1 <lệnh>
+
+# Xem tất cả plugin đã đăng ký + trạng thái bật/tắt trong config/scraper_config.yaml
+./nassistant.sh list-plugins
 
 # Cào: quét mọi nguồn enabled → Raw Data Lake
-python cli.py harvest
+./nassistant.sh harvest
 
 # Cào một nguồn cụ thể (thử dry-run trước để preview)
-python cli.py harvest --source yt-long-matt-wolfe --dry-run
-python cli.py harvest --source yt-long-matt-wolfe
+./nassistant.sh harvest --source yt-long-matt-wolfe --dry-run
+./nassistant.sh harvest --source yt-long-matt-wolfe
 
 # Cào tất cả nguồn của một loại plugin, giới hạn 5 item mỗi nguồn
-python cli.py harvest --type youtube_long --limit 5
+./nassistant.sh harvest --type youtube_long --limit 5
 
 # Lọc: chạy pipeline chống spam 3 lớp trên toàn bộ dữ liệu thô
-python cli.py filter
+./nassistant.sh filter
 
 # Lọc chỉ các đoạn transcript YouTube Long Video
-python cli.py filter --type youtube_long
+./nassistant.sh filter --type youtube_long
 ```
 
-Chạy `python cli.py --help` hoặc `python cli.py <lệnh> --help` để xem toàn bộ tùy chọn.
+Chạy `./nassistant.sh --help` hoặc `./nassistant.sh <lệnh> --help` để xem toàn bộ tùy chọn.
 
 > **Lớp 3 gọi LLM**, nên đặt trước `INFERENCE_PROVIDER` / `INFERENCE_BASE_URL` / `INFERENCE_MODEL` / `INFERENCE_API_KEY` trong `.env` — Gemini, OpenAI, hoặc Ollama local (bất kỳ endpoint tương thích OpenAI). Lớp 1–2 chỉ dùng CPU, chạy được mà không cần key.
 
 <details>
-<summary>Chạy qua Docker (toàn stack)</summary>
+<summary>Muốn dùng <code>docker compose</code> thuần? (không qua wrapper)</summary>
+
+Wrapper chỉ là một dòng lệnh bọc quanh `docker compose run`. Image harvester có sẵn `cli.py`, nên mọi lệnh con đều chạy được:
 
 ```bash
-# Cào trong Docker (image có Chromium)
-docker compose --profile harvester run --rm --build harvester
-
-# Lọc trong Docker
-docker compose run --rm --no-deps core-api python cli.py filter
+docker compose --profile harvester run --rm harvester python cli.py list-plugins
+docker compose --profile harvester run --rm harvester python cli.py harvest
+docker compose --profile harvester run --rm harvester python cli.py filter
 ```
 
 </details>

@@ -102,13 +102,12 @@ class MyPlatformExtractor(BaseExtractor):
 n-assistant-core/
 ├── app/
 │   ├── domain/                  # 纯业务实体与端口——零框架依赖
-│   ├── application/             # 用例 + content_filter_pipeline（三层清洗）
+│   ├── application/             # 用例 + 过滤管线（三层反垃圾）
 │   ├── infrastructure/
 │   │   └── harvester/           # engine.py · extractors/plugins/（X、YouTube…）· filters/
 │   └── api/                     # 驱动适配器：FastAPI 路由、模式、依赖注入装配
+├── cli.py                       # ★ 统一 CLI —— 所有采集操作的唯一入口
 ├── scraper_config.yaml          # 采集器数据源 + 过滤阈值——零硬编码
-├── run_harvester.py             # 阶段 1 —— 抓取所有 enabled 来源 → Raw Data Lake
-├── run_filter_pipeline.py       # 阶段 2 —— 三层反垃圾过滤 → approved.json
 ├── raw_data_lake/               # 按租户落地区：texts/（原始）+ filtered/（清洗后）
 ├── docker-compose.yml           # redis + qdrant + core-api（+ harvester profile）
 ├── Dockerfile · Dockerfile.harvester   # core-API 镜像 · 供插件使用的 Chromium 镜像
@@ -164,17 +163,49 @@ curl http://localhost:8000/health
 | Qdrant（向量数据库） | http://localhost:6333 |
 | Redis（broker） | localhost:6379 |
 
-**运行数据管线**——两个解耦阶段：先采集，再清洗：
+📖 **[docs/HARVESTER_GUIDE.md](./docs/HARVESTER_GUIDE.md)** —— 阶段 1 深入讲解：插件架构、CLI 参考、如何在 30 分钟内新增一个采集器。
+
+**运行数据管线**——先采集再清洗，**全程通过 Docker**（无需本地 Python，无需 venv）。一个轻量 wrapper 脚本在 harvester 容器*内部*运行统一的 `cli.py`：
 
 ```bash
-# 1) 采集 —— 抓取 scraper_config.yaml 中所有 enabled 的来源 → Raw Data Lake
-docker compose --profile harvester run --rm --build harvester
+# Linux / macOS：./nassistant.sh <命令>      Windows：.\nassistant.ps1 <命令>
 
-# 2) 清洗 —— 运行三层反垃圾过滤 → raw_data_lake/filtered/approved.json
-docker compose run --rm --no-deps core-api python run_filter_pipeline.py
+# 查看所有已注册插件 + 它们在 config/scraper_config.yaml 中的开/关状态
+./nassistant.sh list-plugins
+
+# 采集：抓取每个 enabled 来源 → Raw Data Lake
+./nassistant.sh harvest
+
+# 采集单个指定来源（先 dry-run 预览）
+./nassistant.sh harvest --source yt-long-matt-wolfe --dry-run
+./nassistant.sh harvest --source yt-long-matt-wolfe
+
+# 采集某一插件类型的所有来源，每个来源上限 5 条
+./nassistant.sh harvest --type youtube_long --limit 5
+
+# 过滤：对所有已采集数据运行三层反垃圾管线
+./nassistant.sh filter
+
+# 仅过滤 YouTube Long Video 片段
+./nassistant.sh filter --type youtube_long
 ```
 
+运行 `./nassistant.sh --help` 或 `./nassistant.sh <命令> --help` 查看全部选项。
+
 > **第 3 层会调用 LLM**，因此请先在 `.env` 中设置 `INFERENCE_PROVIDER` / `INFERENCE_BASE_URL` / `INFERENCE_MODEL` / `INFERENCE_API_KEY`——Gemini、OpenAI 或本地 Ollama（任何兼容 OpenAI 的端点）。第 1–2 层纯 CPU 运行，无需密钥。
+
+<details>
+<summary>更想用纯 <code>docker compose</code>？（不走 wrapper）</summary>
+
+wrapper 只是 `docker compose run` 的一行封装。harvester 镜像内置 `cli.py`，因此任意子命令均可运行：
+
+```bash
+docker compose --profile harvester run --rm harvester python cli.py list-plugins
+docker compose --profile harvester run --rm harvester python cli.py harvest
+docker compose --profile harvester run --rm harvester python cli.py filter
+```
+
+</details>
 
 ---
 

@@ -51,7 +51,7 @@ sources:
   - name: x-ai-antispam-hq
     type: x_twscrape
     tenant_id: tenant_demo
-    enabled: false
+    enabled: true
     options:
       query: '("Claude" OR "Cursor" OR "AI Agent" OR "LLM") -(crypto OR nft OR airdrop) min_faves:200'
       limit: 100

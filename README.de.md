@@ -102,13 +102,12 @@ Der Domänenkern hängt von nichts ab; die Außenwelt dockt über Ports an. Du k
 n-assistant-core/
 ├── app/
 │   ├── domain/                  # Reine Geschäftsentitäten & Ports — keine Framework-Abhängigkeiten
-│   ├── application/             # Anwendungsfälle + content_filter_pipeline (3-Schichten-Clean)
+│   ├── application/             # Anwendungsfälle + Filter-Pipelines (3-Schichten-Anti-Spam)
 │   ├── infrastructure/
 │   │   └── harvester/           # engine.py · extractors/plugins/ (X, YouTube…) · filters/
 │   └── api/                     # Treibender Adapter: FastAPI-Router, Schemas, DI-Verdrahtung
+├── cli.py                       # ★ Vereinheitlichte CLI — einziger Einstiegspunkt für alle Harvest-Ops
 ├── scraper_config.yaml          # Harvester-Quellen + Filter-Schwellenwerte — zero-hardcode
-├── run_harvester.py             # Stufe 1 — aktivierte Quellen scrapen → Raw Data Lake
-├── run_filter_pipeline.py       # Stufe 2 — 3-Schichten-Anti-Spam-Filter → approved.json
 ├── raw_data_lake/               # Mandanten-Landezone: texts/ (roh) + filtered/ (bereinigt)
 ├── docker-compose.yml           # redis + qdrant + core-api (+ harvester-Profil)
 ├── Dockerfile · Dockerfile.harvester   # core-API-Image · Chromium-Image für Plugins
@@ -164,17 +163,49 @@ Fertig — eine vollständige lokale KI-Engine unter `http://localhost:8000`.
 | Qdrant (Vektor-DB) | http://localhost:6333 |
 | Redis (Broker) | localhost:6379 |
 
-**Daten-Pipeline ausführen** — zwei entkoppelte Stufen: erst ernten, dann bereinigen:
+📖 **[docs/HARVESTER_GUIDE.md](./docs/HARVESTER_GUIDE.md)** — Phase-1-Deep-Dive: Plugin-Architektur, CLI-Referenz, wie du in 30 Minuten einen neuen Scraper hinzufügst.
+
+**Daten-Pipeline ausführen** — ernten, dann bereinigen, **vollständig über Docker** (kein lokales Python, kein venv). Ein dünnes Wrapper-Skript führt die vereinheitlichte `cli.py` *im* Harvester-Container aus:
 
 ```bash
-# 1) Ernten — jede aktivierte Quelle in scraper_config.yaml scrapen → Raw Data Lake
-docker compose --profile harvester run --rm --build harvester
+# Linux / macOS: ./nassistant.sh <Befehl>      Windows: .\nassistant.ps1 <Befehl>
 
-# 2) Bereinigen — den 3-Schichten-Anti-Spam-Filter ausführen → raw_data_lake/filtered/approved.json
-docker compose run --rm --no-deps core-api python run_filter_pipeline.py
+# Alle registrierten Plugins + ihren An/Aus-Status in config/scraper_config.yaml anzeigen
+./nassistant.sh list-plugins
+
+# Ernten: jede aktivierte Quelle scrapen → Raw Data Lake
+./nassistant.sh harvest
+
+# Eine einzelne benannte Quelle ernten (erst dry-run zur Vorschau)
+./nassistant.sh harvest --source yt-long-matt-wolfe --dry-run
+./nassistant.sh harvest --source yt-long-matt-wolfe
+
+# Alle Quellen eines Plugin-Typs ernten, je 5 Elemente cappen
+./nassistant.sh harvest --type youtube_long --limit 5
+
+# Filtern: den 3-Schichten-Anti-Spam-Filter über alle geernteten Daten laufen lassen
+./nassistant.sh filter
+
+# Nur YouTube-Long-Video-Segmente filtern
+./nassistant.sh filter --type youtube_long
 ```
 
+Führe `./nassistant.sh --help` oder `./nassistant.sh <Befehl> --help` aus, um alle Optionen zu sehen.
+
 > **Schicht 3 ruft ein LLM auf**, setze daher zuerst `INFERENCE_PROVIDER` / `INFERENCE_BASE_URL` / `INFERENCE_MODEL` / `INFERENCE_API_KEY` in `.env` — Gemini, OpenAI oder lokales Ollama (jeder OpenAI-kompatible Endpunkt). Die Schichten 1–2 laufen rein CPU-basiert und ohne Schlüssel.
+
+<details>
+<summary>Lieber pures <code>docker compose</code>? (ohne Wrapper)</summary>
+
+Der Wrapper ist nur ein Einzeiler um `docker compose run`. Das Harvester-Image enthält `cli.py`, daher funktioniert jeder Unterbefehl:
+
+```bash
+docker compose --profile harvester run --rm harvester python cli.py list-plugins
+docker compose --profile harvester run --rm harvester python cli.py harvest
+docker compose --profile harvester run --rm harvester python cli.py filter
+```
+
+</details>
 
 ---
 

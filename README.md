@@ -163,44 +163,46 @@ That's it — a full local AI engine on `http://localhost:8000`.
 | Qdrant (vector DB) | http://localhost:6333 |
 | Redis (broker) | localhost:6379 |
 
-📖 **[HARVESTER_GUIDE.md](./HARVESTER_GUIDE.md)** — Phase 1 deep-dive: plugin architecture, CLI reference, how to add a new scraper in 30 minutes.
+📖 **[docs/HARVESTER_GUIDE.md](./docs/HARVESTER_GUIDE.md)** — Phase 1 deep-dive: plugin architecture, CLI reference, how to add a new scraper in 30 minutes.
 
-**Run the data pipeline** — harvest then filter, via the unified CLI:
+**Run the data pipeline** — harvest then filter, **entirely through Docker** (no local Python, no venv). A thin wrapper runs the unified `cli.py` *inside* the harvester container:
 
 ```bash
-# Show all registered plugins + their on/off status in scraper_config.yaml
-python cli.py list-plugins
+# Linux / macOS: ./nassistant.sh <command>      Windows: .\nassistant.ps1 <command>
+
+# Show all registered plugins + their on/off status in config/scraper_config.yaml
+./nassistant.sh list-plugins
 
 # Harvest: scrape every enabled source → Raw Data Lake
-python cli.py harvest
+./nassistant.sh harvest
 
 # Harvest a single named source (dry-run first to preview)
-python cli.py harvest --source yt-long-matt-wolfe --dry-run
-python cli.py harvest --source yt-long-matt-wolfe
+./nassistant.sh harvest --source yt-long-matt-wolfe --dry-run
+./nassistant.sh harvest --source yt-long-matt-wolfe
 
 # Harvest all sources of one plugin type, capping items at 5 each
-python cli.py harvest --type youtube_long --limit 5
+./nassistant.sh harvest --type youtube_long --limit 5
 
 # Filter: run the 3-layer anti-spam pipeline over all harvested data
-python cli.py filter
+./nassistant.sh filter
 
 # Filter only YouTube Long Video segments
-python cli.py filter --type youtube_long
+./nassistant.sh filter --type youtube_long
 ```
 
-Run `python cli.py --help` or `python cli.py <command> --help` to see all options.
+Run `./nassistant.sh --help` or `./nassistant.sh <command> --help` to see all options.
 
 > **Layer 3 calls an LLM**, so set `INFERENCE_PROVIDER` / `INFERENCE_BASE_URL` / `INFERENCE_MODEL` / `INFERENCE_API_KEY` in `.env` first — Gemini, OpenAI, or local Ollama (any OpenAI-compatible endpoint). Layers 1–2 are CPU-only and run without a key.
 
 <details>
-<summary>Docker alternative (full stack)</summary>
+<summary>Prefer raw <code>docker compose</code>? (no wrapper)</summary>
+
+The wrapper is just a one-liner around `docker compose run`. The harvester image ships `cli.py`, so any subcommand works:
 
 ```bash
-# Harvest inside Docker (Chromium-enabled image)
-docker compose --profile harvester run --rm --build harvester
-
-# Filter inside Docker
-docker compose run --rm --no-deps core-api python cli.py filter
+docker compose --profile harvester run --rm harvester python cli.py list-plugins
+docker compose --profile harvester run --rm harvester python cli.py harvest
+docker compose --profile harvester run --rm harvester python cli.py filter
 ```
 
 </details>
