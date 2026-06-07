@@ -30,7 +30,7 @@ sources:
   - name: x-ai-trending
     type: x_twscrape
     tenant_id: tenant_demo
-    enabled: true
+    enabled: false  # ← tắt tạm để test YT Shorts
     options:
       query: "AI agent since:2026-06-02 lang:en min_faves:200"
       limit: 50
@@ -41,7 +41,7 @@ sources:
   - name: x-ai-tools
     type: x_twscrape
     tenant_id: tenant_demo
-    enabled: true
+    enabled: false  # ← tắt tạm để test YT Shorts
     options:
       query: "(#AItools OR #LLM OR #GenerativeAI) -(discord OR telegram OR airdrop) since:2026-06-02 min_faves:200"
       limit: 50
@@ -56,7 +56,7 @@ sources:
   - name: x-ai-antispam-hq
     type: x_twscrape
     tenant_id: tenant_demo
-    enabled: true
+    enabled: false  # ← tắt tạm để test YT Shorts
     options:
       query: '("Claude" OR "Cursor" OR "AI Agent" OR "LLM") -(crypto OR nft OR airdrop) min_faves:200'
       limit: 100
@@ -65,38 +65,62 @@ sources:
       product: "Top"
       locale: en
 
-  # ── YouTube Shorts — AI topic search (yt-dlp) ───────────────────────────
-  # Searches YouTube by keyword, filters to Shorts (≤60 s). No API key needed.
-  # Set download_video: true to save mp4 files to the Raw Data Lake.
-  - name: youtube-shorts-ai-trends
+  # ── YouTube Shorts — Channel mode (verified AI/tech creators) ──────────
+  # Scrapes the /shorts tab of curated, high-quality channels.
+  # Content is from verified creators with real engagement (millions of views).
+  # This is the PRIMARY quality source. Search mode below is for discovery.
+  - name: yt-fireship
     type: youtube_shorts
     tenant_id: tenant_demo
     enabled: true
     options:
-      query: "AI tools 2025"
-      limit: 20
-      download_video: false
+      channel: "@Fireship"          # 3M+ subs, AI/web/tech Shorts
+      limit: 10
       max_duration_s: 60
+      download_video: false
 
-  - name: youtube-shorts-ai-agents
+  - name: yt-matt-wolfe
     type: youtube_shorts
     tenant_id: tenant_demo
     enabled: true
     options:
-      query: "AI agent automation 2025"
-      limit: 20
-      download_video: false
+      channel: "@MattVidPro"        # Matt Wolfe — AI tools & news
+      limit: 10
       max_duration_s: 60
+      download_video: false
 
-  - name: youtube-shorts-llm-news
+  - name: yt-worldofai
+    type: youtube_shorts
+    tenant_id: tenant_demo
+    enabled: false                  # TODO: tìm handle đúng
+    options:
+      channel: "@WorldofAI"          # AI news & demos
+      limit: 10
+      max_duration_s: 60
+      download_video: false
+
+  - name: yt-networkchuck
     type: youtube_shorts
     tenant_id: tenant_demo
     enabled: true
     options:
-      query: "LLM news latest"
-      limit: 15
-      download_video: false
+      channel: "@NetworkChuck"      # Tech/AI tutorials
+      limit: 10
       max_duration_s: 60
+      download_video: false
+
+  # ── YouTube Shorts — Search mode (discovery, broad net) ────────────────
+  # Backup discovery source with min_views gate to avoid garbage.
+  - name: yt-search-ai-news
+    type: youtube_shorts
+    tenant_id: tenant_demo
+    enabled: true
+    options:
+      query: "AI news"
+      limit: 10
+      min_views: 500                # quality gate — chặn kênh 0-view
+      max_duration_s: 60
+      download_video: false
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 3-Layer Anti-Spam Filter Config (read by content_filter_pipeline.py)
@@ -111,3 +135,11 @@ filter_config:
     min_words: 15
     # Maximum @mentions — mass-mention threads are almost always off-topic.
     max_mentions: 2
+
+  # ── YouTube Shorts heuristic (read by yt_filter_pipeline.py) ──────────
+  youtube_shorts_heuristic:
+    # Minimum combined (title + description) word count.
+    # Lowered from 30 → 10 because YT Shorts descriptions are naturally
+    # shorter than tweets. The LLM judge at Layer 3 handles quality.
+    min_transcript_words: 10
+
