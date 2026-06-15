@@ -28,8 +28,8 @@ It is not customer-billing isolation. No auth, no dashboard, no monetization.
 |---|---|---|
 | **0. Foundation** | Data crawling pipeline (raw JSON from X, YouTube, web), clean MIT repo, per-niche examples | 🟢 Done |
 | **1. Skeleton** | FastAPI core, `/health`, Docker, unified CLI | ✅ Done |
-| **2. Vector Memory** | Chunking + `bge-m3` + Qdrant + multi-namespace | 🚧 In progress |
-| **3. Advanced RAG** | Hybrid Search + RRF + Corrective RAG (CRAG) via LangGraph; per-niche domain adapter | ⏳ Next |
+| **2. Vector Memory** | Chunking + `bge-m3` + Qdrant + multi-namespace | ✅ Done |
+| **3. Advanced RAG** | Hybrid Search + RRF + Corrective RAG (CRAG) via LangGraph; per-niche domain adapter | 🚧 In progress |
 | **4. Fine-tuning** | LoRA on Qwen2.5-7B, multi-domain dataset, GGUF merge | ⏳ Planned |
 | **5. Visual & Character Engine** | ComfyUI consistent character, SDXL/Flux + ControlNet, video + TTS + ffmpeg | ⏳ Planned |
 | **6. Agentic Orchestrator** | LangGraph multi-agent + domain router + tool calling | ⏳ Planned |
@@ -66,13 +66,15 @@ FastAPI core, `/health`, Docker Compose (redis + qdrant + core-api), unified `cl
 
 ---
 
-## Phase 2 — Vector Memory 🚧
+## Phase 2 — Vector Memory ✅
 
 > **Goal:** turn approved chunks into a queryable multilingual memory.
 - Chunking strategy → `BAAI/bge-m3` embedding (1024-dim) → Qdrant upsert with `{tenant_id, doc_id, source, locale, ingested_at}`.
 - **Multi-namespace:** mandatory `tenant_id` payload filter on every `upsert`/`search`; cross-namespace query is a violation.
 - **Learn:** code cosine similarity by hand; understand the embedding space; cross-lingual retrieval (VN query → DE docs).
 - **DoD:** a `tenant_id`-filtered Qdrant query returns harvested chunks; cross-language isolation test passes.
+- **Shipped:** `chunker.py`, `bge_embedder.py` (FlagEmbedding), `qdrant_store.py` (idempotent upsert + namespace-filtered search), `ingestion.py` (hexagonal DI). CLI commands `ingest` + `search`. Docker Compose profile `rag`.
+- **Debt to carry into Phase 3:** cross-language isolation unit tests not yet written (DoD partially met).
 
 ---
 

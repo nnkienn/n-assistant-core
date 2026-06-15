@@ -134,7 +134,7 @@ n-assistant-core/
 | Tự động hóa | Playwright + `playwright-stealth` |
 | Eval / MLOps | RAGAS + custom metrics · LangFuse / Prometheus + Grafana · DVC / W&B / MLflow (nhẹ) |
 | ML runtime | PyTorch (MPS trên Mac, CUDA trên GPU Linux) |
-| Container | Docker Compose (profile: default, harvester) |
+| Container | Docker Compose (profile: default, harvester, rag) |
 | Giấy phép | MIT |
 
 ---
@@ -147,7 +147,7 @@ Các chặng được sắp xếp để mỗi chặng dạy bạn một tầng c
 |---|---|---|---|
 | **0. Nền móng** | Pipeline cào dữ liệu (JSON thô từ X, YouTube, web) · repo MIT sạch · ví dụ theo niche | Kiến trúc plugin, config zero-hardcode, bộ lọc 3 lớp | 🟢 Xong |
 | **1. Khung xương** | FastAPI core, `/health`, Docker, CLI thống nhất | Kiến trúc Hexagonal, quy trình container | ✅ Xong |
-| **2. Bộ nhớ Vector** | Chunking + `bge-m3` + Qdrant + đa namespace | Toán embedding, **tự tay** code cosine similarity, cô lập namespace | 🚧 Đang làm |
+| **2. Bộ nhớ Vector** | Chunking + `bge-m3` + Qdrant + đa namespace | Toán embedding, **tự tay** code cosine similarity, cô lập namespace | ✅ Xong |
 | **3. RAG Nâng cao** | Hybrid Search + **RRF** + **Corrective RAG (CRAG)** qua LangGraph · domain adapter theo niche | Toán RRF, graph workflow, sửa lỗi retrieval | ⏳ Tiếp theo |
 | **4. Fine-tuning** | **LoRA** trên `Qwen2.5-7B` · dataset đa domain (base + theo niche) · merge GGUF | Toán cập nhật low-rank, lượng tử hóa, thiết kế dataset | ⏳ Dự kiến |
 | **5. Visual & Character Engine** | ComfyUI + IP-Adapter / FaceID + character LoRA · Flux/SDXL + ControlNet · image/text→video · lip-sync + TTS clone (XTTS/CosyVoice) · ffmpeg auto-edit | Kỹ thuật nhất quán, điều khiển diffusion, pipeline video | ⏳ Dự kiến |

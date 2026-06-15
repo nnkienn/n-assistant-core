@@ -134,7 +134,7 @@ n-assistant-core/
 | Automation | Playwright + `playwright-stealth` |
 | Eval / MLOps | RAGAS + custom metrics · LangFuse / Prometheus + Grafana · DVC / W&B / MLflow (light) |
 | ML runtime | PyTorch (MPS on Mac, CUDA on Linux GPU) |
-| Containers | Docker Compose (profiles: default, harvester) |
+| Containers | Docker Compose (profiles: default, harvester, rag) |
 | License | MIT |
 
 ---
@@ -147,7 +147,7 @@ The phases are ordered so each one teaches a layer of the stack from scratch. St
 |---|---|---|---|
 | **0. Foundation** | Data crawling pipeline (raw JSON from X, YouTube, web) · clean MIT repo · per-niche examples | Plugin architecture, zero-hardcode config, 3-layer filter | 🟢 Done |
 | **1. Skeleton** | FastAPI core, `/health`, Docker, unified CLI | Hexagonal architecture, container workflow | ✅ Done |
-| **2. Vector Memory** | Chunking + `bge-m3` + Qdrant + multi-namespace | Embedding math, cosine similarity **by hand**, namespace isolation | 🚧 In progress |
+| **2. Vector Memory** | Chunking + `bge-m3` + Qdrant + multi-namespace | Embedding math, cosine similarity **by hand**, namespace isolation | ✅ Done |
 | **3. Advanced RAG** | Hybrid Search + **RRF** + **Corrective RAG (CRAG)** via LangGraph · per-niche domain adapter | RRF math, graph workflows, retrieval correction | ⏳ Next |
 | **4. Fine-tuning** | **LoRA** on `Qwen2.5-7B` · multi-domain dataset (base + per-niche) · GGUF merge | Low-rank update math, quantization, dataset design | ⏳ Planned |
 | **5. Visual & Character Engine** | ComfyUI + IP-Adapter / FaceID + character LoRA · Flux/SDXL + ControlNet · image/text→video · lip-sync + TTS clone (XTTS/CosyVoice) · ffmpeg auto-edit | Consistency techniques, diffusion control, video pipeline | ⏳ Planned |
