@@ -8,39 +8,27 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# build-essential + zlib1g-dev: required to compile zlib-state (C extension, dep of ir-datasets → FlagEmbedding).
+# build-essential + zlib1g-dev: compile zlib-state (C ext, dep of ir-datasets → FlagEmbedding).
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
 
-# ── WHY --no-deps for torch ──────────────────────────────────────────────────
-# On Linux, torch pulls cuda-toolkit which drags in ~2.5GB of NVIDIA libs
-# (cublas 542MB, cudnn 444MB, triton 188MB, nccl 206MB, ...) — completely
-# useless inside Docker on Mac (no GPU, no MPS in Linux VM).
-#
-# Strategy:
-#   1. Install torch --no-deps → wheel only, NO cuda-toolkit pulled.
-#   2. Manually install torch's pure-python deps not covered by other packages.
-#   3. Install -r requirements.txt: FlagEmbedding sees torch already present
-#      → pip skips reinstall → cuda-toolkit never triggered.
-#
-# Result: image ~4GB instead of ~10GB.
-RUN pip install --upgrade pip && \
-    pip install torch --no-deps && \
-    pip install "sympy>=1.13" "networkx>=2.5" "jinja2>=3.1" "mpmath>=1.1"
-
-RUN pip install -r requirements.txt
+# NOTE: torch trên Linux aarch64 (Docker trên Mac Apple Silicon) kéo theo ~2.5GB CUDA libs.
+# Không thể tách ra vì torch._C.cpython-311.so hard-link libcudart + libcudnn tại import time.
+# Image ~9.7GB là chi phí cố định — build 1 lần, pip layer được cache, không rebuild lại trừ
+# khi requirements.txt thay đổi.
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Application code
 COPY app ./app
 
-# Tests baked in so CI can run `pytest` without volume mounts.
-# In local dev, mount overrides this: `-v ./tests:/app/tests`
+# Tests baked in — CI chạy `pytest` không cần volume mount.
+# Local dev: `-v ./tests:/app/tests` để override.
 COPY tests ./tests
 
-# Config (source registry + filter thresholds) and the unified CLI entry point
+# Config and CLI
 COPY config ./config
 COPY cli.py ./
 
