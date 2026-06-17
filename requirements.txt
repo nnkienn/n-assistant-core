@@ -43,3 +43,6 @@ youtube-transcript-api>=0.6,<1.0
 # they download at runtime into a mounted HF cache volume (see docker-compose).
 FlagEmbedding>=1.2,<2.0
 numpy>=1.26,<3.0
+
+# ─── Testing ──────────────────────────────────────────────────────────────
+pytest>=8.0,<9.0
