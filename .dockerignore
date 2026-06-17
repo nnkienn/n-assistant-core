@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Python cache — không bao giờ đưa vào image
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+dist/
+build/
+.eggs/
+
+# Virtual envs
+.venv
+venv/
+env/
+
+# HF model cache — weights download vào Docker volume lúc runtime, KHÔNG bake vào image
+.cache/
+*.cache
+
+# Raw data — có thể rất lớn (GBs)
+raw_data_lake/
+
+# Dev tools
+.env
+.env.*
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Pytest / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Skills / agent config — chỉ dùng local, không cần trong image
+.skills/
+.agent/

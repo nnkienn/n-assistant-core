@@ -44,5 +44,11 @@ youtube-transcript-api>=0.6,<1.0
 FlagEmbedding>=1.2,<2.0
 numpy>=1.26,<3.0
 
+# ─── Phase 3: CRAG + LangGraph ────────────────────────────────────────────
+# LangGraph = state-machine framework cho Supervisor–Worker multi-agent (§2 ai-agent-design.md).
+# langgraph kéo theo langchain-core transitively; pin chặt để tránh breaking changes.
+langgraph>=0.2,<2.0
+langchain-core>=0.3,<1.0
+
 # ─── Testing ──────────────────────────────────────────────────────────────
 pytest>=8.0,<9.0
