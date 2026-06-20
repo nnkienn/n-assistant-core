@@ -1,11 +1,13 @@
 <!--
 ═══════════════════════════════════════════════════════════════════════════
-🟢 REPO SCOPE BANNER — n-assistant-core (MIT · OPEN-SOURCE · SINGLE REPO)
+🟢 REPO SCOPE BANNER — Nyxara (MIT · OPEN-SOURCE · SINGLE REPO)
 ═══════════════════════════════════════════════════════════════════════════
 This is the architecture spec for the WHOLE project. There is ONE repo, MIT.
-This is a personal / community LEARNING engine — an open-source "Virtual
-Content Factory" you fork and customize for your own niche. It is NOT a SaaS
+This is a personal / community LEARNING engine — an open-source multilingual
+RAG + agentic engine you fork and customize for your own niche, aimed at
+seller-affiliate content automation with a human in the loop. It is NOT a SaaS
 product: no billing, no user auth, no admin dashboard, no commercial cloud.
+It does NOT auto-publish: drafts go to a human; sending uses official APIs.
 
   • `tenant_id` exists ONLY as a namespace so one install can host several
     niches/users side by side in the vector store. It is NOT customer-billing
@@ -18,12 +20,13 @@ enforceable engineering rules.
 ═══════════════════════════════════════════════════════════════════════════
 -->
 
-# 🌍 ARCHITECTURE SPECIFICATION — N-Assistant Core (V4.0, Learning Edition)
+# 🌍 ARCHITECTURE SPECIFICATION — Nyxara (V5.0, Learning Edition · Niche-Focused)
 
-> **V4.0 changelog (De-SaaS & Full Learning Roadmap):** removes the B2B-SaaS / two-repo "Open-Core" framing entirely — this is now a single MIT repo built as a learning vehicle. Reframes `tenant_id` from customer isolation to a **namespace for multiple niches/users**. Adds the visual/character engine, advanced RAG (Hybrid + RRF + CRAG), LoRA fine-tuning, evaluation, and light MLOps as first-class layers. Canonical roadmap: [`master-execution-plan.md`](master-execution-plan.md).
+> **V5.0 changelog (Niche refocus):** repositions from "Virtual Content Factory / autonomous auto-publish" → a **multilingual RAG + agentic engine, built from scratch as a learning vehicle**, aimed at one concrete niche: content & social automation for **seller-affiliates on TikTok Shop / Shopee (VN)**, **human-in-the-loop**. **Removes browser auto-posting from the main path** (Playwright stealth, AES-256 session vault, scheduled auto-posting) — when publishing is needed, use the platform's **official API**. Demotes the **Visual & Character Engine to an OPTIONAL track**. Expands Advanced RAG (adds reranking, metadata filtering, semantic chunking) and **pulls basic evaluation (RAGAS + A/B) up into Phase 3**. Carries over from V4.0: single MIT repo, `tenant_id` as a **namespace for multiple niches/users**, LoRA fine-tuning, light MLOps. Canonical roadmap: [`master-execution-plan.md`](master-execution-plan.md).
 >
 > **DOCUMENT CLASSIFICATION:** Core engineering spec. Binding for every AI agent and human contributor on the project.
-> **PROJECT VISION:** N-Assistant Core is an open-source, modular **Virtual Content Factory** — fork it for your niche (MMO, Game AI, Beauty, Crypto, Education…), run it 100% local. The point is to *learn* the full autonomous-content stack from scratch: harvest → RAG → reason → fine-tune → generate visuals/video → publish.
+> **PROJECT VISION:** Nyxara is an open-source, modular **multilingual RAG + agentic engine** — fork it for your niche, run it 100% local. The point is to *learn* AI engineering from scratch (advanced RAG, fine-tuning, agentic, eval) with a concrete destination: a **Comment Assistant** for seller-affiliates that reads public comments, retrieves the right product info, drafts an on-voice reply, and hands it to a **human to approve before sending** (no auto-post).
+> **FIRST CORE PRODUCT:** the **Comment Assistant** — read public comments under a selling video → RAG-retrieve product info (price/usage/link), metadata-filtered to *that* product → draft reply → **Critic blocks fabricated facts & unverified efficacy claims** → **human approves** → send via **official API**.
 > **LANGUAGES SUPPORTED END-TO-END:** Vietnamese (VN), English (EN), German (DE), Chinese (CN).
 > **CONSTITUTIONAL FILES:** This doc · [`../rules/tech-stack-rule.md`](../rules/tech-stack-rule.md) · [`ai-agent-design.md`](ai-agent-design.md).
 
@@ -33,10 +36,10 @@ enforceable engineering rules.
 
 Inject the locale-matched line into the root context of every working AI Agent.
 
-- 🇻🇳 **Vietnamese:** N-Assistant Core là một Nhà máy Nội dung Ảo mã nguồn mở, modular — fork cho niche của bạn, chạy 100% local. Cốt lõi: RAG đa namespace, suy luận Hybrid (Local/Cloud), và phân phối nội dung đa nền tảng. Mục tiêu là học sâu toàn bộ stack.
-- 🇬🇧 **English:** N-Assistant Core is an open-source, modular Virtual Content Factory — fork it for your niche, run it 100% local. The core is namespace-scoped RAG, hybrid inference routing (Local vs Cloud), and omnichannel auto-publishing. The goal is to learn the full stack deeply.
-- 🇩🇪 **German:** N-Assistant Core ist eine quelloffene, modulare Virtual Content Factory — forke sie für deine Nische, betreibe sie 100% lokal. Kern: namespace-gebundenes RAG, hybride Inferenz (Lokal/Cloud), automatisierte Omnichannel-Veröffentlichung. Ziel ist tiefes Lernen des gesamten Stacks.
-- 🇨🇳 **Chinese:** N-Assistant Core 是一个开源、模块化的虚拟内容工厂 — 为你的细分领域 fork，100% 本地运行。核心：按命名空间隔离的 RAG、混合推理路由（本地/云）、全渠道自动发布。目标是深入学习整个技术栈。
+- 🇻🇳 **Vietnamese:** Nyxara là một động cơ RAG đa ngôn ngữ + agentic mã nguồn mở, modular — fork cho niche của bạn, chạy 100% local. Cốt lõi: RAG đa namespace, suy luận Hybrid (Local/Cloud), và pipeline agentic có người duyệt (human-in-the-loop) cho seller-affiliate. Mục tiêu là học sâu toàn bộ stack.
+- 🇬🇧 **English:** Nyxara is an open-source, modular multilingual RAG + agentic engine — fork it for your niche, run it 100% local. The core is namespace-scoped RAG, hybrid inference routing (Local vs Cloud), and a human-in-the-loop agentic pipeline for seller-affiliates. The goal is to learn the full stack deeply.
+- 🇩🇪 **German:** Nyxara ist eine quelloffene, modulare mehrsprachige RAG- + Agenten-Engine — forke sie für deine Nische, betreibe sie 100% lokal. Kern: namespace-gebundenes RAG, hybride Inferenz (Lokal/Cloud), eine Human-in-the-Loop-Agenten-Pipeline für Seller-Affiliates. Ziel ist tiefes Lernen des gesamten Stacks.
+- 🇨🇳 **Chinese:** Nyxara 是一个开源、模块化的多语言 RAG + 智能体引擎 — 为你的细分领域 fork，100% 本地运行。核心：按命名空间隔离的 RAG、混合推理路由（本地/云）、面向卖家联盟的人工介入（human-in-the-loop）智能体流水线。目标是深入学习整个技术栈。
 
 ---
 
@@ -44,7 +47,7 @@ Inject the locale-matched line into the root context of every working AI Agent.
 
 | Repo | License | Stack | What lives here |
 |---|---|---|---|
-| **`n-assistant-core`** | MIT (public) | Python 3.11 · FastAPI · LangGraph · Qdrant · Playwright · PyTorch · ComfyUI | Everything: harvester, RAG pipeline, agent workflows, fine-tuning scripts, visual/video engine, auto-upload bots. Runs in Docker, native on Mac M-series, or self-hosted GPU. |
+| **`nyxara`** | MIT (public) | Python 3.11 · FastAPI · LangGraph · Qdrant · PyTorch · *(optional: ComfyUI)* | Everything on the main path: harvester, RAG pipeline (Hybrid + RRF + rerank + CRAG), agent workflows (human-in-the-loop), fine-tuning scripts, eval. The visual/video engine is an **optional** add-on (needs GPU). Runs in Docker, native on Mac M-series, or self-hosted GPU. |
 
 **There is no second repo and no commercial layer.** Anything you'd expect in a SaaS — billing, user accounts, RBAC, an admin dashboard — is **out of scope by design**. A user-facing UI, if ever added, is a thin optional Streamlit/Gradio panel that calls the same local API; it never becomes a tenancy/billing system.
 
@@ -69,11 +72,14 @@ graph TD
     LLMRouter -->|Scale| CloudLLM[vLLM on rented GPU · or Cloud API fallback]
     LLMRouter -->|Dev / Self-host| LocalLLM[Ollama / Apple MLX · Qwen2.5 / Llama-3.1-8B + LoRA adapter]
 
-    CeleryWorker -->|visual jobs| Visual[ComfyUI · SDXL/Flux · TTS · ffmpeg]
-    CeleryWorker -->|Auto-upload trigger| PlaywrightBot[Playwright Headless Browser]
-    PlaywrightBot --> YouTube[YouTube Shorts]
-    PlaywrightBot --> Facebook[FB / IG Reels]
+    CeleryWorker -->|Critic-passed draft| ReviewQueue[(Human Review Queue)]
+    ReviewQueue -->|human approves| OfficialAPI[Platform Official API]
+    CeleryWorker -.->|OPTIONAL · GPU| Visual[ComfyUI · SDXL/Flux · TTS · ffmpeg]
 ```
+
+**No auto-publish.** A Critic-passed draft lands in a human review queue; only an
+approved item is sent, and only via the platform's **official API** — never a
+headless/stealth browser. The visual/video path is an **optional** GPU add-on.
 
 Optional persistence (Postgres) holds local config, source registry, and run history — **not** users or billing.
 
@@ -84,7 +90,7 @@ Optional persistence (Postgres) holds local config, source registry, and run his
 ### §3.1 Entry & Config Layer
 
 - **Primary interface:** the unified `cli.py` + the FastAPI orchestrator. Optional thin UI (Streamlit/Gradio) is a nice-to-have, never required.
-- **Config-driven:** a single `config.yaml` (planned, Phase 7) lets a forker pick model, niche, character, output style without touching code. Harvester sources live in `scraper_config.yaml`.
+- **Config-driven:** a single `config.yaml` (planned, Phase 6) lets a forker pick model, niche, output style without touching code. Harvester sources live in `scraper_config.yaml`.
 - **Namespace, not auth:** requests carry a `tenant_id` namespace + `locale`. There is no login, no JWT, no role system. The namespace simply selects which niche's data and style apply.
 
 ### §3.2 Orchestration Layer
@@ -99,8 +105,13 @@ Optional persistence (Postgres) holds local config, source registry, and run his
 - **Namespace isolation:** a dedicated collection per niche, or a single collection with a **mandatory** `tenant_id` payload filter on every `upsert` and `search`. Cross-namespace bleed is an architectural violation — your MMO niche must never retrieve Game-AI chunks.
 - **Pipeline:** LangChain text splitters → `BAAI/bge-m3` embedding → Qdrant upsert with metadata `{tenant_id, doc_id, source, locale, ingested_at}`.
 - **Cross-lingual capability:** `bge-m3` produces a single shared embedding space across VN/EN/DE/CN → a Vietnamese niche can query its German knowledge base without a translation pre-pass.
-- **Advanced RAG (Phase 3):** Hybrid Search (dense + sparse/BM25) fused with **Reciprocal Rank Fusion (RRF)**, then **Corrective RAG (CRAG)** as a LangGraph loop that grades retrieval quality and self-corrects (re-query / web fallback) before generation. A per-niche **domain adapter** biases retrieval toward the active niche.
-- **Learning focus:** code cosine similarity and the RRF formula by hand before leaning on libraries.
+- **Advanced RAG (Phase 3) — a togglable 3-stage pipeline** (full spec: [`master-execution-plan.md`](master-execution-plan.md) Phase 3; engineering rules: [`../rules/tech-stack-rule.md`](../rules/tech-stack-rule.md) §5):
+  - **Pre-Retrieval — Query Transformation** *(optional, per-query)*: **Multi-Query** (split a complex question into 3–4 sub-queries, fuse via RRF) and **HyDE** (embed a hypothetical answer instead of the raw question) to close the query↔document vocab gap on deep niches. Each costs one async local-LLM call (~2–4 s); a status run-event is emitted so it doesn't read as a hang.
+  - **Retrieval — Metadata-filter → Hybrid + RRF → Rerank → Small-to-Big**: a **metadata payload filter** (`product_id`, `price_band`, `category`, `locale`) narrows to the right product/price band **before** semantic ranking (used live by the Comment Assistant — *not* "closest vector wins"); dense (bge-m3) + sparse (BM25) are fused with **Reciprocal Rank Fusion (RRF)**; a **cross-encoder reranker (`bge-reranker-v2-m3`)** re-scores the top-k by reading query+doc *together* (the biggest top-k quality lift after retrieval; **bi-encoder vs cross-encoder** trade-off). **Chunking** is a mode (`chunk_strategy="flat" | "semantic" | "parent_child"`): **semantic chunking** splits by meaning rather than fixed length, and **Parent-Child** indexes ~200-tok children for precision and fetches the ~1000-tok parent for context via a Qdrant payload index on `parent_id`.
+  - **Post-Retrieval — Context Compression** *(optional)*: an `LLMClientBase` extractor keeps only the query-answering sentences (verbatim, no paraphrase; raw-chunk fallback on a non-substring extraction) to fit the local model's token budget. *Not LLMLingua* — that stays a Phase 6 option.
+  - **Self-correction:** **Corrective RAG (CRAG)** wraps the above as a LangGraph loop that grades retrieval quality and self-corrects **inside the local store** (re-query, widen `top_k`, relax threshold, BM25-only fallback) before generation — **no internet egress by default**. An optional `web_search` correction tool is **off by default and hard-disabled when `INFERENCE_MODE=self_hosted`** ([`ai-agent-design.md`](ai-agent-design.md) §8.6). A per-niche **domain adapter** biases retrieval toward the active niche.
+  - **Measured, not assumed:** a fixed gold eval set (≈10–20 Q/A per niche) + **RAGAS** (faithfulness, answer relevancy, context precision/recall) land **in Phase 3**, so every technique above is A/B'd **on vs off** and kept only if the metrics justify the latency. Heavy MLOps stays in Phase 6 (§3.7).
+- **Learning focus:** code cosine similarity and the RRF formula by hand before leaning on libraries; understand the **bi-encoder vs cross-encoder** distinction, query↔document space mismatch, chunk-granularity trade-offs (semantic vs fixed; small-to-big), metadata pre-filtering, token-budget management, and **RAG evaluation metrics**. Retrieval logic stays **pure Python + `LLMClientBase` + `qdrant-client`** (no LangChain retriever wrappers); LangGraph owns flow only (§5).
 
 ### §3.4 Dual-Engine AI Inference
 
@@ -118,14 +129,31 @@ class LLMClientBase(Protocol):
 
 Routing decision is config (`INFERENCE_MODE=local|cloud|hybrid`), not code. Agent code is identical across tiers.
 
+**"Tier" is a logical role, not a fixed model.** Tier-1 (Supervisor, Critic, hero Creator) = the strongest engine *available in the current deployment*; Tier-2 (Researcher, variants, CRAG grader) = a cheaper/faster engine. The mapping is config, and the honest reality differs by hardware:
+
+| Hardware | Tier-1 engine | Tier-2 engine | Honest caveat |
+|---|---|---|---|
+| GPU box (≥12 GB) or rented vLLM | local 7B+ (Qwen2.5-7B / Llama-3.1-8B) | same or 3B | full design holds |
+| **No-GPU / CPU box** (e.g. Ollama `qwen2.5:3b`) | best local 3B — **best-effort only** | 3B | the Critic + CRAG grader are weak judges at 3B; **anti-hallucination guarantees degrade**. Route Tier-1 to a cloud API (`hybrid`) to restore them — at the cost of "100% local". |
+| Hybrid (recommended for no-GPU learners) | cloud API for Tier-1 | local 3B for Tier-2 | strong judging where it matters, cheap local work elsewhere |
+
+> **The OPTIONAL Visual & Character Engine (ComfyUI SDXL/Flux + video/TTS) requires a real GPU** — it is *not* realistically CPU-local, which is one reason it sits off the main learning path. The "100% local" promise holds end-to-end only on a GPU box; on CPU-only hardware, the CORE phases (0–7) run locally while Tier-1 reasoning needs a cloud route and the optional visual track needs a GPU. Set this expectation in the README.
+
 ### §3.5 Fine-tuning Layer (Phase 4)
 
-- **Method:** LoRA (low-rank adaptation) on `Qwen2.5-7B`. Train a **base adapter** on the shared content style + optional **per-niche adapters** (MMO, Game AI…). A forker can train their own adapter for their niche — this is a core open-source value.
+- **Method:** LoRA (low-rank adaptation) on `Qwen2.5-7B`. Train a **base adapter** on the shared content style + optional **per-niche adapters** (seller-affiliate, beauty…). A forker can train their own adapter for their niche — this is a core open-source value.
 - **Dataset design:** multi-domain — a common base dataset plus per-niche fine-tune examples. Track JSON-output parsing rate, style consistency, and hallucination rate before/after.
+- **Embedding / domain fine-tuning lives here too** (same fine-tuning cluster, *not* Phase 3): when the Phase 3 gold-set eval shows retrieval is the bottleneck, adapt `bge-m3` to the niche's vocabulary and re-measure retrieval precision on that gold set.
 - **Quantization & serving:** merge adapter → GGUF (Q4/Q5/Q8) → serve via Ollama.
-- **Learning focus:** the low-rank update math (`W + ΔW = W + B·A`), why rank `r` matters, and quantization trade-offs.
+- **Learning focus:** the low-rank update math (`W + ΔW = W + B·A`), why rank `r` matters, quantization trade-offs, and embedding fine-tuning.
 
-### §3.6 Visual & Character Engine (Phase 5)
+### §3.6 Visual & Character Engine — *OPTIONAL track (needs GPU, off the main path)*
+
+> **Not on the main learning path.** This teaches diffusion/video, not the core
+> AI-engineering route, and requires a real GPU. The agent/plugin architecture
+> lets it be added **later without breaking** what's built — it slots a Visual
+> Director + Video Producer into the agent graph without changing existing roles'
+> contracts ([`ai-agent-design.md`](ai-agent-design.md) §3.6–3.7).
 
 - **Consistent character / avatar:** ComfyUI + IP-Adapter + FaceID + a character LoRA so the same virtual KOL / game character appears across videos. Forkers can train their own character.
 - **Image generation:** Flux / SDXL + ControlNet (pose, outfit, product placement). The LLM emits structured JSON with `visual_prompt`, `style`, `scene` fields that drive the pipeline.
@@ -136,8 +164,8 @@ Routing decision is config (`INFERENCE_MODE=local|cloud|hybrid`), not code. Agen
 
 - **Workers:** Redis broker + Celery for any task >2s (PDF ingest, embedding batches, video render, Playwright upload). Progress via WebSocket or polling.
 - **Logging:** `structlog` with fields `{tenant_id, request_id, agent, tool, latency_ms, token_usage, retrieval_score}`. Token counting emits **usage metadata for observability** — there is no wallet/billing debit.
-- **Monitoring:** LangFuse or Prometheus + Grafana for latency, token usage, and retrieval scores (Phase 7).
-- **Evaluation (Phase 7):** RAGAS (faithfulness, relevance, answer correctness) + custom metrics for script quality, visual consistency, and an engagement proxy. LLM-as-Judge and small human-eval sets. Before/after fine-tuning comparison on a fixed test set.
+- **Monitoring:** LangFuse or Prometheus + Grafana for latency, token usage, and retrieval scores (Phase 6).
+- **Evaluation:** **RAGAS + a hand-built gold set land in Phase 3** (≈10–20 Q/A per niche) — faithfulness, answer relevancy, context precision/recall + custom metrics (e.g. right-product hit rate) — so every advanced-RAG technique is A/B'd on vs off. **Phase 6** then scales this into release-over-release tracking, LLM-as-Judge and small human-eval sets, and before/after fine-tuning comparison on a fixed test set. (Visual-consistency / engagement-proxy metrics only apply if the optional Visual track is built.)
 - **Error handling & fallback:** every layer fails safe (e.g. if CRAG can't ground an answer, the Critic refuses to pass it).
 
 ### §3.8 Harvester Layer (Data Ingestion — strictly separate from Inference)
@@ -168,7 +196,7 @@ never reasons, never calls an LLM, and shares no process with the agents.
 - **`tenant_id` is stamped at the Harvester layer** — on the very first raw file,
   not bolted on downstream. A harvested artifact missing `tenant_id` is discarded.
 
-### §3.9 Extensibility & Community Layer (Phase 8)
+### §3.9 Extensibility & Community Layer (Phase 7)
 
 - **Plugin architecture everywhere:** new scraper, new visual backend, new TTS, new LLM client — all drop-in via a one-file contract.
 - **Niche templates:** MMO Affiliate, Game AI, Tech, Education… ship as example configs + datasets so a forker is productive in minutes.
@@ -192,10 +220,11 @@ These are targets to *measure and learn from* on a personal/self-hosted box — 
 
 | Concern | Target |
 |---|---|
-| RAG query latency | p95 < 800ms on Mac M-series MPS for top-k retrieval |
-| LLM tool-call latency | p95 < 4s (local Qwen2.5-7B) / < 2s (rented vLLM GPU) |
+| RAG retrieval only (no LLM in loop) | p95 < 800ms on Mac M-series MPS for top-k retrieval |
+| LLM tool-call latency (single call) | p95 < 4s (local Qwen2.5-7B) / < 2s (rented vLLM GPU) |
+| Full advanced-RAG pass (Phase 3, all flags on) | budget p95 **< 12–15s on local 3B** — HyDE + CRAG grade + (re-query) + compression stack several LLM calls; this is *why* each stage is a flag. On GPU/7B target **< 6s**. The 800ms/4s rows above are the *plain* path with advanced flags off. |
 | Multi-niche isolation | Cross-namespace bleed rate = 0 (verified by test) |
 | Embedding throughput | ≥ 500 docs/min on Mac M-series MPS, ≥ 5000 docs/min on a prod-class GPU |
-| RAG eval (Phase 7) | RAGAS faithfulness & answer-relevance tracked release-over-release |
+| RAG eval (Phase 3 basic · Phase 6 at scale) | RAGAS faithfulness & answer-relevance tracked; every advanced-RAG flag A/B'd on vs off |
 | Fine-tune quality (Phase 4) | JSON-output parse rate ↑, hallucination rate ↓ vs base, on a fixed test set |
 | Cost per generated post | ≤ $0.05 local, ≤ $0.30 on rented GPU (measured, for awareness) |

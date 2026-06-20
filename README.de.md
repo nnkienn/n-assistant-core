@@ -1,17 +1,17 @@
 <div align="center">
 
-# N-Assistant Core 🤖🚀
+# Nyxara 🤖🚀
 
-### Die Open-Source Virtual Content Factory — forke sie für deine Nische, betreibe sie 100% lokal
+### KI-Engineering richtig lernen — eine mehrsprachige RAG- + Agenten-Engine von Grund auf bauen, ausgerichtet auf eine konkrete Nische
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-DC244C.svg?logo=qdrant&logoColor=white)](https://qdrant.tech/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C.svg)](https://langchain-ai.github.io/langgraph/)
 [![Celery](https://img.shields.io/badge/Celery-37814A.svg?logo=celery&logoColor=white)](https://docs.celeryq.dev/)
-[![Playwright](https://img.shields.io/badge/Playwright-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev/)
 
-**Eine modulare, MIT-lizenzierte Engine zum Bauen einer autonomen KI-Content-Pipeline — ernten → erinnern → schlussfolgern → fine-tunen → Visuals erzeugen → veröffentlichen. Läuft vollständig lokal, kein Vendor-Lock-in.**
+**Die meisten „KI lernen"-Nebenprojekte sterben als zusammengeklebte Tutorials ohne Nutzer und ohne jede Möglichkeit zu erkennen, ob irgendetwas funktioniert. Nyxara setzt auf das Gegenteil: Du baust jede Schicht selbst — Advanced RAG, Fine-tuning, Agenten-Workflows, Evaluation — und richtest sie auf eine echte Aufgabe aus: einen *Comment Assistant* für TikTok-Shop- / Shopee-Seller-Affiliates. Mensch in der Schleife, nie Auto-Posting.**
 
 🌐 🇬🇧 [English](./README.md) · 🇻🇳 [Tiếng Việt](./README.vi.md) · 🇩🇪 **Deutsch** · 🇨🇳 [中文](./README.zh.md)
 
@@ -19,22 +19,41 @@
 
 ---
 
-## 🎯 Projektvision
+## 🎯 Warum es das gibt
 
-**N-Assistant Core** ist eine Open-Source **Virtual Content Factory**: eine modulare KI-Engine, die du **für deine eigene Nische forkst und anpasst** — MMO/Affiliate, Game AI, Beauty, Crypto, Bildung, was auch immer — und **100% lokal** betreibst.
+Zwei Dinge töten die meisten „Ich lerne KI-Engineering"-Projekte:
 
-Sie verkettet ein **mehrsprachiges Retrieval-Augmented-Generation (RAG)**-Gehirn mit einem **LangGraph**-Agentengraphen und einem **Playwright**-Automatisierungsarm, sodass eine autonome Pipeline **recherchieren → schreiben → Visuals erzeugen → prüfen → veröffentlichen** kann — auf YouTube, Facebook & Instagram, ohne Mensch in der Schleife und ohne ein einziges Byte an eine Drittanbieter-Cloud zu senden, es sei denn, *du* willst es.
+1. **Sie sind aus Tutorials zusammengenäht.** Du verdrahtest einen LangChain-Retriever, bekommst eine Antwort und lernst nie, *warum* dense Retrieval danebenlag, was RRF eigentlich berechnet oder ob dein Reranker geholfen hat. Das Verständnis bleibt nie hängen.
+2. **Sie haben kein Ziel.** Keine echte Aufgabe, kein echter Nutzer, keine Möglichkeit „besser" zu messen. Die Motivation verfliegt.
 
-Sie ist als **Vehikel zum tiefen Lernen gebaut, nicht als Produkt zum Verkaufen.** Das Ziel ist, jede Schicht zu *verstehen* — die Embedding-Mathematik, RRF, die Low-Rank-Updates von LoRA, Quantisierung, Agentengraphen, ComfyUI-Konsistenz — indem man sie von Grund auf baut und jede laufende Zeile besitzt.
+**Nyxara behebt beides.** Es ist eine mehrsprachige **RAG- + Agenten-Engine, die du von Grund auf baust** — du besitzt die Embedding-Mathematik, die RRF-Formel, das Cross-Encoder-Rerank, das LoRA-Update, die Eval-Metriken — und sie ist auf eine **konkrete Nische mit echten (wenn auch kleinen) Nutzern** ausgerichtet: Content- & Social-Automatisierung für **Seller-Affiliates auf TikTok Shop / Shopee in Vietnam.**
 
-> **Multi-Nische, kein Multi-Tenant-SaaS.** Eine Installation kann mehrere Nischen nebeneinander beherbergen. Eine `tenant_id` (Namespace) hält das Wissen jeder Nische im Vektorspeicher getrennt — dein MMO-Index läuft nie in deinen Game-AI-Index über. Es gibt **kein Billing, keine Auth, keine kommerzielle Cloud** — nur einen sauberen Namespace, damit du (oder ein Fork) viele Domains aus einer Engine betreiben kannst.
+> **Für die Leserin / den Leser:** Wenn du KI-Engineering *verstehen* willst — nicht nur eine API aufrufen — indem du ein kohärentes System mit einem echten, demonstrierbaren und messbaren Ziel baust, dann ist dieses Repo für dich. Es ist **zuerst ein Lernvehikel**, dann ein Nischenwerkzeug. Kein Multi-Tenant-SaaS, kein Marktspiel.
+
+Es läuft standardmäßig **100% lokal** (kein Byte verlässt deine Maschine, es sei denn, du wählst eine Cloud-Stufe), und eine `tenant_id` als **Namespace** lässt eine Installation mehrere Nischen nebeneinander beherbergen — *Ordner pro Nische*, nicht *Tenant pro zahlendem Kunden*. Kein Billing, keine Auth, kein Dashboard.
+
+---
+
+## 🛍️ Leitanwendung — der Comment Assistant
+
+Das ist das Nischenziel, das jeder Technik einen Daseinsgrund gibt.
+
+Ein Seller-Affiliate postet ein Produktvideo auf TikTok Shop / Shopee. Darunter häufen sich Dutzende Kommentare: *„Wie viel kostet das?"*, *„Geht das bei fettiger Haut?"*, *„Wie lange dauert der Versand?"*. Der Comment Assistant verwandelt diesen Schwall in geprüfte, markenkonforme Antworten:
+
+1. **Lesen** der öffentlichen Kommentare unter dem Video.
+2. **Abrufen** der richtigen Produktfakten — Preis, Inhaltsstoffe, Anwendung, offizieller Link — **gefiltert auf *genau dieses Produkt*** (erst Metadaten-Filter, *dann* semantische Suche — nicht „der nächste Vektor gewinnt").
+3. **Entwerfen** einer Antwort in der Stimme und Sprache des Sellers.
+4. **Kritik:** ein dedizierter **Critic-Agent blockiert erfundene Fakten und unbelegte Wirkungsversprechen** — unverhandelbar bei Kosmetik/Gesundheit, wo ein falsches Versprechen ein Vertrauens- und Rechtsproblem ist.
+5. **Ein Mensch genehmigt**, bevor irgendetwas gesendet wird. **Nyxara postet nie automatisch.** Wenn eine Antwort *gesendet* wird, läuft sie über die **offizielle API** der Plattform — nie über einen Stealth-Browser.
+
+Jede RAG-/Agenten-/Eval-Technik unten verdient sich ihren Platz, indem sie hier eine echte Frage beantwortet: *Hat das Retrieval das richtige Produkt gezogen? Hat das Rerank die Antwort wirklich verbessert? Hat der Critic das falsche Versprechen erwischt?*
 
 ---
 
 ## 🔥 Kernfähigkeiten
 
 ### 1. 🌾 Pluggable Harvester — Jede Plattform, Community-getrieben
-**Das ist Phase 0 — das Fundament, von dem alles andere lebt.** Ein geplanter (Cron) Crawler erfasst **öffentliche** Daten, stempelt sie mit einem `tenant_id`-Namespace, legt sie in einem nischenweisen **Raw Data Lake** ab und reinigt sie dann durch einen 3-Schichten-Anti-Spam-Filter — vollständig von den Agenten entkoppelt (*Datenerfassung ≠ Inferenz*; diese Schicht ruft **nie** ein LLM auf).
+**Das ist Phase 0 — das Fundament, von dem alles andere lebt.** Ein geplanter (Cron) Crawler erfasst **öffentliche** Daten — **Produktinformationen und öffentliche Kommentar-Beispiele** für den Comment Assistant — stempelt sie mit einem `tenant_id`-Namespace, legt sie in einem nischenweisen **Raw Data Lake** ab und reinigt sie dann durch einen 3-Schichten-Anti-Spam-Filter — vollständig von den Agenten entkoppelt (*Datenerfassung ≠ Inferenz*; diese Schicht ruft **nie** ein LLM auf).
 
 **Binde jede Plattform ein — lege eine Datei ab.** Die Engine erkennt zur Laufzeit automatisch jedes Plugin unter [`extractors/plugins/`](./app/infrastructure/harvester/extractors/plugins/). Eine neue Quelle ist eine Klasse — keine Core-Änderungen, keine hartkodierten Imports:
 
@@ -49,7 +68,7 @@ class MyPlatformExtractor(BaseExtractor):
 Ein abstürzendes Plugin wird geloggt und übersprungen — eine schlechte Quelle reißt nie den ganzen Lauf nieder.
 
 **Heute ausgeliefert:** `x_twscrape` (X / Twitter via twscrape) · `youtube_shorts` (YouTube Shorts via yt-dlp).
-**Wir brauchen deine Hilfe** 🤝 — Plattformen entwickeln ihre Anti-Bot-Abwehr ständig weiter. Trage ein neues Plattform-Plugin bei (TikTok, Instagram, Reddit, LinkedIn…) oder eine frische **Bypass-/Stealth-Technik** für ein bestehendes. Der ganze Vertrag ist eine Datei: [`base.py`](./app/infrastructure/harvester/extractors/base.py).
+**Wir brauchen deine Hilfe** 🤝 — öffentliche Seiten ändern ständig Markup und Rate-Limits. Trage ein neues Plattform-Plugin bei (TikTok, Shopee, Instagram, Reddit…) oder hilf, einen bestehenden Extraktor **robust und ToS-konform** zu halten. Der ganze Vertrag ist eine Datei: [`base.py`](./app/infrastructure/harvester/extractors/base.py).
 
 **3-Schichten-Anti-Spam-Filter** — fail-fast und kostenbewusst; jedes Item muss sich die nächste Schicht verdienen, sodass der bezahlte LLM-Aufruf nur sieht, was bereits zwei kostenlose CPU-Gates überlebt hat:
 
@@ -68,12 +87,14 @@ Eine einzige `LLMClientBase` (OpenAI-kompatible) Schnittstelle lässt jeden Agen
 
 Das Routing ist eine **Laufzeit-Konfigurationsentscheidung**, nie ein Rewrite. Derselbe Agenten-Code läuft in beiden Stufen.
 
+> **Hardware-Erwartungen (ehrlich):** die CORE-Phasen laufen bequem auf einer CPU-/No-GPU-Box mit einem lokalen 3B-Modell. Aber das **Critic-/CRAG-Grading** will ein leistungsfähiges Modell — auf einer reinen 3B-Box ist dieses Urteilen *best-effort*, also route Tier-1 auf eine Cloud-/Hybrid-Engine, wenn du starke Anti-Halluzination brauchst. Die **OPTIONALE Visual Engine (ComfyUI Bild/Video + TTS) braucht eine echte GPU** und ist nicht realistisch CPU-lokal. „100% lokal" gilt durchgängig auf einer GPU-Box; auf reiner CPU-Hardware deckt es das RAG-/Agenten-Gehirn ab, nicht den optionalen Visual-Track.
+
 ### 3. 🧠 Multi-Nische & mehrsprachiges RAG
 - **Vektorspeicher:** [Qdrant](https://qdrant.tech/) mit namespace-gebundenen Collections.
 - **Embeddings:** `BAAI/bge-m3` (1024-dim, 100+ Sprachen) → ein gemeinsamer sprachübergreifender Index, **keine Collection pro Sprache**.
-- **Namespace-Isolation:** jedes `upsert` / `search` trägt einen verpflichtenden `tenant_id`-Payload-Filter, sodass mehrere Nischen/Nutzer in einem Speicher koexistieren — mit **null nischenübergreifendem Durchsickern**, eine Architekturgarantie, keine Laufzeitprüfung.
+- **Namespace-Isolation:** jedes `upsert` / `search` trägt einen verpflichtenden `tenant_id`-Payload-Filter, sodass mehrere Nischen in einem Speicher koexistieren — mit **null nischenübergreifendem Durchsickern**, eine Architekturgarantie, keine Laufzeitprüfung.
 - **Sprachübergreifendes Retrieval:** eine vietnamesische Nische kann ihre deutschsprachige Wissensbasis in einem Raum abfragen.
-- **Was du hier lernst:** Chunking-Strategie, die Embedding-Mathematik, Cosinus-Ähnlichkeit von Hand, dann **Hybrid Search + RRF + Corrective RAG (CRAG)**, wenn das Gehirn reift (Phase 3).
+- **Was du hier lernst:** Chunking-Strategie, die Embedding-Mathematik, Cosinus-Ähnlichkeit von Hand, dann den vollen **Advanced-RAG-Stack aus Phase 3** — Hybrid Search, RRF, Cross-Encoder-Reranking, CRAG, Query-Transformation und gemessene Evaluation (siehe Roadmap unten).
 
 ### 4. 🕹️ Supervisor–Worker-Agenten-Topologie
 Wir stopfen **nicht** alles in einen riesigen Prompt. Jede Anfrage wird in spezialisierte Rollen zerlegt:
@@ -81,19 +102,14 @@ Wir stopfen **nicht** alles in einen riesigen Prompt. Jede Anfrage wird in spezi
 | Rolle | Verantwortung | Werkzeuge |
 |---|---|---|
 | **Supervisor (Planner)** | Intent zerlegen → geordneter Task-Graph; an Worker routen | Task-Router |
-| **Researcher** | Trend-Mining + namespace-gebundene RAG-Abfrage | `search_vector_db(tenant_id, …)` |
-| **Creator** | Skript / Copy / Storyboard entwerfen | `generate_text`, `generate_image`, `generate_audio` |
-| **Critic** | Stimmen-Review + Claim-vs-Context-Anti-Halluzination | RAG-Verifier (≤ 3 Retry-Schleifen) |
-| **Publisher** | Playwright-Auto-Upload auslösen | `publish_to_platform(tenant_id, …)` |
+| **Researcher** | Namespace-gebundene RAG-Abfrage (treibt die Phase-3-Pipeline) | `search_vector_db(tenant_id, …)` |
+| **Creator** | Antwort / Copy in der Stimme des Sellers entwerfen | `generate_text` |
+| **Critic** | Anti-Halluzination: erfundene Fakten & unbelegte Wirkungsversprechen blockieren | RAG-Verifier (≤ 3 Retry-Schleifen) |
+| **Human Reviewer** | Genehmigen / bearbeiten / ablehnen, bevor etwas gesendet wird — **die Schleife schließt sich auf einem Menschen, nicht auf Auto-Send** | Review-Queue |
 
-Der Critic prüft die Verankerung, bevor etwas ausgeliefert wird. Wenn die **Visual Engine** landet (Phase 5–6), wächst dieser Graph um einen **Visual Director** und einen **Video Producer**.
+Der **Critic ist der Burggraben**: Er prüft die Verankerung, bevor ein Entwurf den Menschen erreicht, und der Mensch ist das letzte Tor. **Es gibt keinen Auto-Publish-Agenten.** Wenn eine genehmigte Antwort gesendet wird, läuft sie über die **offizielle API** der Plattform.
 
-### 5. 📡 Omnichannel-Auto-Distribution
-**Redis + Celery** leiten asynchrone Jobs an **Playwright**-Headless-Browser, die veröffentlichen und dabei menschliches Verhalten imitieren, um in Plattformlimits zu bleiben:
-- YouTube Shorts · Facebook · Instagram Reels.
-- Sitzungs-Cookies **AES-256-verschlüsselt** gespeichert (nie im Klartext).
-- `playwright-stealth` zur Umgehung von Bot-Erkennung.
-- Planung nach Namespace-Zeitzone + Peak-Hour-Heuristik.
+> Der Agenten-Graph ist plugin-förmig: Der OPTIONALE Visual-Track (spätere Phase) kann einen **Visual Director** und einen **Video Producer** als Knoten hinzufügen, ohne die Verträge der bestehenden Rollen zu ändern.
 
 ---
 
@@ -125,42 +141,61 @@ n-assistant-core/
 | Schicht | Technologie |
 |---|---|
 | API | FastAPI (Python 3.11) · Pydantic v2 · SQLAlchemy 2.x |
-| Vector / RAG | **Qdrant** · `BAAI/bge-m3`-Embeddings (1024-dim, mehrsprachig) · Hybrid + RRF + CRAG |
+| Vector / RAG | **Qdrant** · `BAAI/bge-m3`-Embeddings (1024-dim, mehrsprachig) · Hybrid + RRF + **Cross-Encoder-Rerank (`bge-reranker-v2-m3`)** + CRAG · Metadaten-Filter · Semantic Chunking |
 | Inferenz | `LLMClientBase` → Ollama / Apple MLX (dev) · vLLM / Cloud-API (scale) |
-| Fine-tuning | LoRA auf `Qwen2.5-7B` · GGUF-Quantisierungs-Merge (Q4/Q5/Q8) |
-| Visual / Video | ComfyUI · Flux / SDXL · ControlNet · IP-Adapter / FaceID · XTTS / CosyVoice · ffmpeg |
-| Agenten-Framework | LangGraph (Supervisor–Worker, Multi-Agent) |
+| Fine-tuning | LoRA auf `Qwen2.5-7B` · GGUF-Quantisierungs-Merge (Q4/Q5/Q8) · Embedding-/Domain-Fine-tuning |
+| Agenten-Framework | LangGraph (Supervisor–Worker, Multi-Agent, Human-in-the-Loop) |
+| Eval | **RAGAS** (Faithfulness, Answer Relevancy, Context Precision/Recall) + Custom-Metriken + A/B-Umschaltung — **ab Phase 3** |
 | Async-Jobs | Celery 5 + Redis-7-Broker |
-| Automatisierung | Playwright + `playwright-stealth` |
-| Eval / MLOps | RAGAS + Custom-Metriken · LangFuse / Prometheus + Grafana · DVC / W&B / MLflow (leicht) |
+| MLOps (Phase 6) | LangFuse / Prometheus + Grafana · DVC / W&B / MLflow (leicht) · CI/CD-Retrain |
+| Visual / Video — *OPTIONAL* | ComfyUI · Flux / SDXL · ControlNet · IP-Adapter / FaceID · XTTS / CosyVoice · ffmpeg *(braucht GPU)* |
 | ML-Runtime | PyTorch (MPS auf Mac, CUDA auf Linux-GPU) |
-| Container | Docker Compose (Profile: default, harvester) |
+| Container | Docker Compose (Profile: default, harvester, rag) |
 | Lizenz | MIT |
 
 ---
 
-## 🗺️ Roadmap — Ein Lernpfad, Phasen 0→8
+## 🗺️ Roadmap — Ein Lernpfad
 
-Die Phasen sind so geordnet, dass jede eine Schicht des Stacks von Grund auf lehrt. Der Status ist ehrlich, nicht aspirational.
+Die Phasen sind so geordnet, dass jede eine Schicht des Stacks von Grund auf lehrt. Der Status ist ehrlich, nicht aspirational. **CORE**-Phasen sind der Haupt-Lernpfad; der **OPTIONALE** Visual-Track liegt daneben — die Architektur lässt dich ihn später anschrauben, *ohne* das Gebaute zu zerbrechen, aber er lehrt Diffusion/Video, nicht die zentrale KI-Engineering-Route.
 
-| Phase | Thema | Was du baust & lernst | Status |
-|---|---|---|---|
-| **0. Fundament** | Daten-Crawling-Pipeline (rohes JSON aus X, YouTube, Web) · sauberes MIT-Repo · Beispiele pro Nische | Plugin-Architektur, Zero-Hardcode-Config, 3-Schichten-Filter | 🟢 Fertig |
-| **1. Skelett** | FastAPI-Core, `/health`, Docker, einheitliche CLI | Hexagonale Architektur, Container-Workflow | ✅ Fertig |
-| **2. Vektor-Gedächtnis** | Chunking + `bge-m3` + Qdrant + Multi-Namespace | Embedding-Mathematik, Cosinus-Ähnlichkeit **von Hand**, Namespace-Isolation | 🚧 In Arbeit |
-| **3. Advanced RAG** | Hybrid Search + **RRF** + **Corrective RAG (CRAG)** via LangGraph · Domain-Adapter pro Nische | RRF-Mathematik, Graph-Workflows, Retrieval-Korrektur | ⏳ Als Nächstes |
-| **4. Fine-tuning** | **LoRA** auf `Qwen2.5-7B` · Multi-Domain-Dataset (Basis + pro Nische) · GGUF-Merge | Low-Rank-Update-Mathematik, Quantisierung, Dataset-Design | ⏳ Geplant |
-| **5. Visual & Character Engine** | ComfyUI + IP-Adapter / FaceID + Character-LoRA · Flux/SDXL + ControlNet · Image/Text→Video · Lip-Sync + TTS-Clone (XTTS/CosyVoice) · ffmpeg-Auto-Edit | Konsistenztechniken, Diffusionssteuerung, Video-Pipeline | ⏳ Geplant |
-| **6. Agentic Orchestrator** | LangGraph-Multi-Agent (Researcher → Script Writer → Visual Director → Video Producer → Critic) · **Domain-Router** · Tool-Calling | Multi-Agent-Design, Nischen-Routing | ⏳ Geplant |
-| **7. Production, MLOps & Eval** | Voller Docker-Stack (Qdrant + Ollama + ComfyUI + FastAPI + Redis) · **RAGAS** + Custom-Metriken · Monitoring/Logging (LangFuse, Prometheus + Grafana) · `config.yaml` · CI/CD-Retrain · Experiment-Tracking (W&B / MLflow) · Dataset-/Adapter-/Prompt-Versionierung (DVC / HF Hub) | Eval-Frameworks, Observability, leichtes MLOps | ⏳ Geplant |
-| **8. Community & Erweiterbarkeit** | Nischen-Templates (MMO, Game AI, Tech, Bildung…) · Plugin-Architektur (Scraper / Visual / TTS) · Beispielprojekte | OSS-Erweiterbarkeit, Plugin-Design | ⏳ Geplant |
+| Phase | Track | Thema | Was du baust & lernst | Status |
+|---|---|---|---|---|
+| **0. Fundament** | CORE | Harvester: **Produktdaten + öffentliche Kommentar-Beispiele** · sauberes MIT-Repo · Beispiele pro Nische | Plugin-Architektur, Zero-Hardcode-Config, 3-Schichten-Filter | 🟢 Fertig |
+| **1. Skelett** | CORE | FastAPI-Core, `/health`, Docker, einheitliche CLI | Hexagonale Architektur, Container-Workflow | ✅ Fertig |
+| **2. Vektor-Gedächtnis** | CORE | Chunking + `bge-m3` + Qdrant + Multi-Namespace | Embedding-Mathematik, Cosinus-Ähnlichkeit **von Hand**, Namespace-Isolation | ✅ Fertig |
+| **3. Advanced RAG + Eval** | CORE | Das volle Retrieval-Gehirn — **siehe Deep-Dive-Tabelle unten** — plus gemessene Evaluation (RAGAS + A/B) fest eingebaut | RRF- & Rerank-Mathematik, Query↔Doc-Raum, Chunk-Granularität, Token-Budget, Graph-Workflows, *messen, ob jede Technik hilft* | ⏳ In Arbeit |
+| **4. Fine-tuning** | CORE | **LoRA** auf `Qwen2.5-7B` · GGUF-Merge · Multi-Domain-Dataset · **Embedding-/Domain-Fine-tuning** | Low-Rank-Update-Mathematik, Quantisierung, Dataset- & Embedding-Tuning-Design | ⏳ Geplant |
+| **5. Agentic Orchestrator** | CORE | LangGraph-Supervisor–Worker (Researcher → Creator → **Critic**) · **Comment Assistant** end-to-end · **Human-in-the-Loop-Review** · Domain-Router | Multi-Agent-Design, Grounding & Anti-Halluzination, HITL-Workflows, Nischen-Routing | ⏳ Geplant |
+| **6. Production, MLOps & Eval** | CORE | Voller Docker-Stack · Monitoring/Logging (LangFuse, Prometheus + Grafana) · `config.yaml` · CI/CD-Retrain · Experiment-Tracking (W&B / MLflow) · Versionierung (DVC / HF Hub) | Observability, reproduzierbares ML, schweres MLOps | ⏳ Geplant |
+| **7. Community & Erweiterbarkeit** | CORE | Nischen-Templates (Seller-Affiliate, Beauty, Tech…) · Plugin-Architektur (Scraper / LLM-Client) · Beispielprojekte | OSS-Erweiterbarkeit, Plugin-Design | ⏳ Geplant |
+| **★ Visual & Character Engine** | **OPTIONAL** | ComfyUI + IP-Adapter / FaceID + Character-LoRA · Flux/SDXL + ControlNet · Image/Text→Video · Lip-Sync + TTS-Clone (XTTS/CosyVoice) · ffmpeg-Auto-Edit | Konsistenztechniken, Diffusionssteuerung, Video-Pipeline | 🧩 Add-on · braucht GPU |
+
+### Phase 3 im Detail — Advanced RAG, jede Technik pro Query zuschaltbar
+
+Der ganze Sinn von Phase 3 ist, jede Technik **von Hand** zu bauen (reines Python über `LLMClientBase` + `qdrant-client`, LangGraph nur für den Fluss) und dann **zu messen, ob sie wirklich hilft** — *RAG ohne Messen zu lernen, heißt blind zu lernen.*
+
+| Technik | Was sie tut | Was du lernst |
+|---|---|---|
+| **Hybrid Search** (dense + sparse/BM25) | semantisches + Keyword-Retrieval zusammen ausführen | wann dense sparse schlägt und wann sparse dense schlägt |
+| **RRF** (Reciprocal Rank Fusion) | mehrere Ranglisten zu einer verschmelzen | die RRF-Formel von Hand; wie man Rankings fusioniert |
+| **Cross-Encoder-Reranking** (`bge-reranker-v2-m3`, gleiche Familie wie bge-m3) | Top-k neu bewerten, indem Query+Doc *zusammen* gelesen werden | warum Reranking die Top-k-Qualität nach dem Retrieval am stärksten hebt; **Bi-Encoder vs Cross-Encoder** |
+| **CRAG** (Corrective RAG) via LangGraph | abgerufenen Kontext bewerten, dann Retry / Verbreitern / Eskalation | Selbstbewertung des Kontexts; selbstkorrigierende Retrieval-Schleifen |
+| **Query Transformation** (Multi-Query + HyDE) | die Query vor der Suche erweitern / umschreiben | die Query↔Dokument-Raum-Diskrepanz und wie man sie schließt |
+| **Parent-Child** (Small-to-Big) Retrieval | auf kleinen Chunks matchen, den großen Parent-Block zurückgeben | präziser Match *und* voller Kontext; Chunk-Granularität |
+| **Context Compression** | abgerufene Chunks auf nur die antwortenden Sätze trimmen | Rauschen schneiden; Token-Budget-Management auf einem kleinen lokalen LLM |
+| **Metadaten-Filterung** (Vektor + Filter) | auf das richtige Produkt / die richtige Preisspanne *vor* der semantischen Suche filtern | strukturierten Filter + Vektorsuche kombinieren — **live im Comment Assistant genutzt** |
+| **Semantic Chunking** | nach Bedeutung teilen, nicht nach fester Länge | wie Chunk-Granularität die Retrieval-Qualität formt |
+| **Evaluation** (RAGAS + Custom + A/B) | Faithfulness, Answer Relevancy, Context Precision/Recall | **ob Rerank / CRAG / Rewrite wirklich verbessern** — von „viel später" nach *jetzt* gezogen |
+
+Jede Technik ist ein **Per-Query-Flag**, standardmäßig aus, sodass du *mit* vs *ohne* A/B-testen und die Metriken lesen kannst. Schweres MLOps (LangFuse/Prometheus/Grafana, CI/CD-Retrain) bleibt in Phase 6 — nur die **Basis-Eval (RAGAS + A/B-Vergleich)** kommt nach Phase 3.
 
 ### Was du tief lernst
-- **Mathematik:** Embeddings, Cosinus-Ähnlichkeit, RRF, Low-Rank-Adaptation (LoRA), Quantisierung.
-- **Architektur:** Advanced RAG, Agentic Workflows (LangGraph), Vektor-DB, Multi-Namespace.
+- **Mathematik:** Embeddings, Cosinus-Ähnlichkeit, RRF, **Cross-Encoder-Reranking**, Low-Rank-Adaptation (LoRA), Quantisierung, **RAG-Evaluationsmetriken**.
+- **Architektur:** Advanced RAG, Agentic Workflows (LangGraph), Vektor-DB, Multi-Namespace, Human-in-the-Loop.
 - **Production:** Fine-tuning, Quantisierung, Pipeline-Orchestrierung, Evaluation, leichtes MLOps.
-- **Visual AI:** ComfyUI-Workflows, ControlNet, Charakter-/Identitätskonsistenz.
 - **Engineering:** modularer Code, Docker, API-Design, Open-Source-Best-Practices.
+- **Optional / Visual AI:** ComfyUI-Workflows, ControlNet, Charakter-/Identitätskonsistenz *(wenn du den optionalen Track auf einer GPU-Box hinzufügst)*.
 
 ---
 
@@ -197,17 +232,17 @@ Das war's — eine vollständige lokale KI-Engine auf `http://localhost:8000`.
 ./nassistant.sh harvest
 
 # Eine einzelne benannte Quelle ernten (erst dry-run zur Vorschau)
-./nassistant.sh harvest --source yt-long-matt-wolfe --dry-run
-./nassistant.sh harvest --source yt-long-matt-wolfe
+./nassistant.sh harvest --source product-catalog-demo --dry-run
+./nassistant.sh harvest --source product-catalog-demo
 
 # Alle Quellen eines Plugin-Typs ernten, je 5 Items begrenzt
-./nassistant.sh harvest --type youtube_long --limit 5
+./nassistant.sh harvest --type youtube_shorts --limit 5
 
 # Filtern: die 3-Schichten-Anti-Spam-Pipeline über alle geernteten Daten laufen lassen
 ./nassistant.sh filter
 
-# Nur YouTube-Long-Video-Segmente filtern
-./nassistant.sh filter --type youtube_long
+# Nur einen Plugin-Typ filtern
+./nassistant.sh filter --type youtube_shorts
 ```
 
 Führe `./nassistant.sh --help` oder `./nassistant.sh <befehl> --help` aus, um alle Optionen zu sehen.
@@ -233,11 +268,11 @@ docker compose --profile harvester run --rm harvester python cli.py filter
 
 Diese sind **konstitutionell**. PRs, die sie verletzen, werden automatisch abgelehnt.
 
-- 🛡️ **Namespace überall.** Jede Vector-DB-Op, jeder Cache-Key und jeder Audit-Log MUSS einen `tenant_id`-Namespace tragen, damit Nischen/Nutzer nie ineinander durchsickern.
+- 🛡️ **Namespace überall.** Jede Vector-DB-Op, jeder Cache-Key und jeder Audit-Log MUSS einen `tenant_id`-Namespace tragen, damit Nischen nie ineinander durchsickern.
 - 🧠 **Ein einziges Embedding-Modell.** `BAAI/bge-m3` ist das einzig erlaubte Embedding — kein Modell pro Sprache, kein OpenAI ada.
 - 🔌 **`LLMClientBase`-Abstraktion.** Agenten rufen `client.complete(...)` — nie `openai.ChatCompletion.*` oder `transformers` direkt.
 - ✅ **TDD verpflichtend.** Red → Green → Refactor. RAG/Agent-Logik braucht **sprachübergreifende Tests** (VN, EN, DE, CN).
-- 🔒 **Verschlüsselter Sitzungs-Tresor.** Playwright-Cookies → AES-256 → Speicher. Nie im Klartext.
+- 🙋 **Human-in-the-Loop, kein Auto-Publishing.** Entwürfe gehen an einen Menschen zum Genehmigen, Bearbeiten oder Ablehnen. Nichts wird autonom gesendet; wenn Inhalt *gesendet* wird, nutzt er die **offizielle API** der Plattform — nie Browser-Automatisierung / Stealth-Posting.
 - 🌾 **Zero-Hardcode-Harvesting.** Scraping-Ziele leben in `scraper_config.yaml`, nur öffentliche Seiten, robots.txt respektiert.
 
 ---
