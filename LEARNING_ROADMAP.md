@@ -128,12 +128,34 @@ query
 
 ---
 
+### CRAG (Corrective RAG) via LangGraph — ✅ Xong
+
+**Kiến thức học được:**
+- **State machine**: `state` = "tờ giấy" chạy qua các **node** (trạm), **điền dần** từng ô.
+- **Node = hàm** (`state → dict` phần cần ghi); **edge** = đường ray cố định; **conditional edge** = rẽ nhánh theo **router**.
+- **grade → verdict → correct**: **LLM-as-judge** chấm CÓ/KHÔNG → đếm `relevant`/`candidates` ra CORRECT/AMBIGUOUS/INCORRECT → INCORRECT thì **tìm lại RỘNG HƠN trong kho** (in-store, không web).
+- **Retry guard** (`attempts`) chặn lặp vô hạn; `async` lan truyền (grade_node async vì gọi LLM).
+
+**Files:**
+
+| File | Mô tả |
+|---|---|
+| [app/application/crag/state.py](app/application/crag/state.py) | CRAGState — TypedDict, tờ giấy chạy qua graph |
+| [app/application/crag/node.py](app/application/crag/node.py) | retrieve / grade / decide / finalize / correct node (factory DI) |
+| [app/application/crag/grader.py](app/application/crag/grader.py) | RelevanceGrader — LLM-as-judge chấm yes/no |
+| [app/application/crag/decision.py](app/application/crag/decision.py) | decide_verdict (logic thuần) + make_router |
+| [app/application/crag/graph.py](app/application/crag/graph.py) | build_crag_graph — ráp StateGraph + vòng lặp `correct → grade` |
+
+**Tests:** 12 — grader (4) + decision (6) + graph e2e (2: test vòng lặp tự sửa + test chốt chặn).
+
+---
+
 ## ⏳ Phase 3 (Còn lại) — 10 kỹ thuật chưa build
 
 | # | Kỹ thuật | Học được gì | Độ ưu tiên |
 |---|----------|------------|-----------|
 | 1 | ~~**Cross-encoder reranking**~~ | ✅ Xong | — |
-| 2 | **CRAG** via LangGraph | self-grading context, corrective retrieval loop | 🔴 Cao |
+| 2 | ~~**CRAG** via LangGraph~~ | ✅ Xong | — |
 | 3 | **Metadata filtering** | lọc sản phẩm trước semantic search — dùng thật trong Comment Assistant | 🔴 Cao |
 | 4 | **Query Transformation** (Multi-Query + HyDE) | query↔doc space mismatch, cách mở rộng query | 🟡 Trung bình |
 | 5 | **Semantic chunking** | chunk granularity ảnh hưởng retrieval thế nào | 🟡 Trung bình |
@@ -238,14 +260,27 @@ ComfyUI · Flux/SDXL · ControlNet · IP-Adapter/FaceID · character LoRA · img
 
 ---
 
+## 🎯 Nguyên tắc: Học vs. Production
+
+> Project này build **tất cả** kỹ thuật để **HỌC cho biết** — nhưng một sản phẩm
+> thật **KHÔNG dùng hết**. Mỗi fork chỉ **bật đúng subset** niche của nó cần (vì
+> vậy mọi kỹ thuật là *flag, mặc định TẮT* — `tech-stack-rule §5.4`).
+>
+> Học hết là để **có phán đoán** chọn đúng — không thể chọn khôn ngoan nếu chưa
+> từng build + đo từng cái. **Eval (Phase 3)** cho biết cái nào *thật sự đáng bật*.
+> **Học một kỹ thuật ≠ phải deploy nó.**
+
+---
+
 ## 📊 Tổng kết Tests
 
 ```
-56 tests passed — 0 failed
+68 tests passed — 0 failed
 ├── Phase 2 infrastructure:  15 tests
 ├── Phase 3 BM25:            13 tests
 ├── Phase 3 RRF:             10 tests
 ├── Phase 3 HybridRetriever: 11 tests
+├── Phase 3 CRAG:            12 tests  (grader 4 · decision 6 · graph e2e 2)
 └── Other (chunker, ingestion, api): 7 tests
 ```
 
@@ -255,6 +290,7 @@ ComfyUI · Flux/SDXL · ControlNet · IP-Adapter/FaceID · character LoRA · img
 
 | Tài liệu | Nội dung |
 |----------|---------|
+| [GLOSSARY.md](GLOSSARY.md) | **Bảng tra thuật ngữ nhanh** — quên từ nào tra 1 dòng ở đây |
 | [notes-knowledge.md](notes-knowledge.md) | Công thức + giải thích khái niệm Phase 2 & 3 |
 | [README.vi.md](README.vi.md) | Roadmap dự án đầy đủ, kiến trúc hệ thống |
 | Cormack et al. 2009 | Paper gốc RRF — `k=60` từ đây |
