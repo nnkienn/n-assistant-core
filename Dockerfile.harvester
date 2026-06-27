@@ -1,4 +1,4 @@
-# n-assistant-core — Harvester image (Phase 1)
+# nyxara-core — Harvester image (Phase 1)
 # Plugins: x_twscrape (GraphQL API) + youtube_long (yt-dlp + transcript-api).
 # No Chromium needed — twscrape and yt-dlp handle everything without a browser.
 FROM python:3.11-slim

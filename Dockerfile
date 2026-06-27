@@ -1,4 +1,4 @@
-# n-assistant-core (MIT, open-source) — FastAPI service
+# nyxara-core (MIT, open-source) — FastAPI service
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \

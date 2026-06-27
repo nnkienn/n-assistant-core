@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# n-assistant-core — COMMUNITY compose (MIT, open-source)
+# nyxara-core — COMMUNITY compose (MIT, open-source)
 # Standalone stack for anyone who clones the public repo and runs it locally.
 # Contains NO SaaS infra (no Postgres, no auth, no billing).
 #
@@ -7,7 +7,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 
 networks:
-  core_net:
+  nyxara_core_net:
     driver: bridge
 
 volumes:
@@ -19,13 +19,13 @@ services:
   # ── Redis — cache & Celery broker ──────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: core-redis
+    container_name: nyxara-core-redis
     ports:
       - "6399:6379"
     volumes:
       - redis_data:/data
     networks:
-      - core_net
+      - nyxara_core_net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -35,14 +35,14 @@ services:
   # ── Qdrant — vector database ───────────────────────────────────────────
   qdrant:
     image: qdrant/qdrant:v1.12.4
-    container_name: core-qdrant
+    container_name: nyxara-core-qdrant
     ports:
       - "6353:6333"   # REST
       - "6354:6334"   # gRPC
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
-      - core_net
+      - nyxara_core_net
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333' || exit 1"]
       interval: 10s
@@ -51,11 +51,11 @@ services:
 
   # ── Core API — FastAPI application ─────────────────────────────────────
   core-api:
-    image: n-assistant-core-api:local-dev
+    image: nyxara-core-api:local-dev
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: core-api
+    container_name: nyxara-core-api
     ports:
       - "8100:8000"
     env_file:
@@ -70,7 +70,7 @@ services:
       qdrant:
         condition: service_healthy
     networks:
-      - core_net
+      - nyxara_core_net
     volumes:
       # The 3-layer filter reads raw data + thresholds in config/scraper_config.yaml.
       # Run via: docker compose run --rm --no-deps core-api python cli.py filter
@@ -93,7 +93,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.harvester   # ships Chromium for Playwright plugins
-    container_name: core-harvester
+    container_name: nyxara-core-harvester
     profiles: ["harvester"]
     command: ["python", "cli.py", "harvest"]
     env_file:
@@ -115,7 +115,7 @@ services:
       # YouTube cookies — same file as core-api (see note above).
       - ./config/yt_cookies.txt:/app/config/yt_cookies.txt
     networks:
-      - core_net
+      - nyxara_core_net
 
   # ── RAG ingest (Phase 2) — one-shot: chunk + embed approved JSON → Qdrant ──
   # Reuses the core-api image (it already installs FlagEmbedding + ships cli.py).
@@ -124,11 +124,11 @@ services:
   #   docker compose --profile rag run --rm ingest        # ingest all approved JSON
   #   docker compose --profile rag run --rm ingest python cli.py search "AI agents"
   ingest:
-    image: n-assistant-core-api:local-dev
+    image: nyxara-core-api:local-dev
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: core-ingest
+    container_name: nyxara-core-ingest
     profiles: ["rag"]                 # opt-in: never auto-starts on `compose up`
     command: ["python", "cli.py", "ingest"]
     env_file:
@@ -143,4 +143,4 @@ services:
       - ./raw_data_lake:/app/raw_data_lake          # reads filtered/approved.json
       - hf_cache:/root/.cache/huggingface           # model cache persists here
     networks:
-      - core_net
+      - nyxara_core_net
